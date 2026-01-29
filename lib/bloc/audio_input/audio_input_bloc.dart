@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_state.dart';
@@ -17,10 +18,10 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     required AudioInputService audioService,
     required AIService aiService,
     required String userId,
-  }) : _audioService = audioService,
-       _aiService = aiService,
-       _userId = userId,
-       super(const AudioInputInitial()) {
+  })  : _audioService = audioService,
+        _aiService = aiService,
+        _userId = userId,
+        super(const AudioInputInitial()) {
     on<InitializeAudioInput>(_onInitialize);
     on<StartListening>(_onStartListening);
     on<StopListening>(_onStopListening);
@@ -34,7 +35,7 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     Emitter<AudioInputState> emit,
   ) async {
     emit(const AudioInputLoading());
-    
+
     try {
       final permissionsGranted = await _audioService.requestPermissions();
       if (!permissionsGranted) {
@@ -76,6 +77,13 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
       await _audioService.startListening((recognizedWords) {
         add(AudioRecognized(recognizedWords));
       });
+
+      // If no speech detected after 3 seconds, show error
+      /*Future.delayed(const Duration(seconds: 3), () {
+        if (state is AudioInputListening && _currentRecognizedText.isEmpty) {
+          emit(const AudioInputError('No speech detected. Please speak clearly and try again.'));
+        }
+      });*/
     } catch (e) {
       emit(AudioInputError('Failed to start listening: $e'));
     }
@@ -87,7 +95,11 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   ) async {
     try {
       await _audioService.stopListening();
-      
+      debugPrint('ds : Stop listening command received');
+
+      // Wait a moment to ensure speech has actually stopped
+      await Future.delayed(const Duration(milliseconds: 500));
+
       if (_currentRecognizedText.isNotEmpty) {
         add(ProcessAudioText(_currentRecognizedText));
       } else {
@@ -106,16 +118,27 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     AudioRecognized event,
     Emitter<AudioInputState> emit,
   ) {
+    // Replace text instead of appending to show individual recognition results
     _currentRecognizedText = event.recognizedText;
-    
-    if (!_partialResults.contains(event.recognizedText)) {
-      _partialResults.add(event.recognizedText);
+
+    final words = event.recognizedText
+        .split(' ')
+        .where((word) => word.trim().isNotEmpty)
+        .toList();
+
+    for (final word in words) {
+      final isDuplicate = _partialResults
+          .any((existing) => existing.toLowerCase() == word.toLowerCase());
+
+      if (!isDuplicate) {
+        _partialResults.add(word);
+      }
     }
 
     if (state is AudioInputListening) {
       emit(AudioInputListening(
         recognizedText: _currentRecognizedText,
-        partialResults: _partialResults,
+        partialResults: List<String>.from(_partialResults),
       ));
     }
   }
@@ -127,15 +150,18 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     emit(const AudioInputLoading());
 
     try {
-      final parsedIngredients = await _aiService.parseIngredientsFromText(event.audioText);
-      
-      final ingredients = parsedIngredients.map((name) => Ingredient(
-        id: const Uuid().v4(),
-        name: name.trim(),
-        category: _categorizeIngredient(name.trim()),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      )).toList();
+      final parsedIngredients =
+          await _aiService.parseIngredientsFromText(event.audioText);
+
+      final ingredients = parsedIngredients
+          .map((name) => Ingredient(
+                id: const Uuid().v4(),
+                name: name.trim(),
+                category: _categorizeIngredient(name.trim()),
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ))
+          .toList();
 
       emit(AudioInputCompleted(
         finalText: event.audioText,
@@ -157,18 +183,33 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
 
   String _categorizeIngredient(String ingredientName) {
     final name = ingredientName.toLowerCase();
-    
-    if (name.contains('milk') || name.contains('cheese') || name.contains('yogurt')) {
+
+    if (name.contains('milk') ||
+        name.contains('cheese') ||
+        name.contains('yogurt')) {
       return 'Dairy';
-    } else if (name.contains('chicken') || name.contains('beef') || name.contains('pork') || name.contains('fish')) {
+    } else if (name.contains('chicken') ||
+        name.contains('beef') ||
+        name.contains('pork') ||
+        name.contains('fish')) {
       return 'Protein';
-    } else if (name.contains('tomato') || name.contains('onion') || name.contains('carrot') || name.contains('lettuce')) {
+    } else if (name.contains('tomato') ||
+        name.contains('onion') ||
+        name.contains('carrot') ||
+        name.contains('lettuce')) {
       return 'Vegetables';
-    } else if (name.contains('apple') || name.contains('banana') || name.contains('orange')) {
+    } else if (name.contains('apple') ||
+        name.contains('banana') ||
+        name.contains('orange')) {
       return 'Fruits';
-    } else if (name.contains('rice') || name.contains('pasta') || name.contains('bread')) {
+    } else if (name.contains('rice') ||
+        name.contains('pasta') ||
+        name.contains('bread')) {
       return 'Grains';
-    } else if (name.contains('oil') || name.contains('butter') || name.contains('salt') || name.contains('pepper')) {
+    } else if (name.contains('oil') ||
+        name.contains('butter') ||
+        name.contains('salt') ||
+        name.contains('pepper')) {
       return 'Pantry';
     } else {
       return 'Other';

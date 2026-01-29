@@ -14,6 +14,9 @@ abstract class AudioInputService {
 class SpeechToTextService implements AudioInputService {
   final SpeechToText _speechToText = SpeechToText();
   bool _isInitialized = false;
+  bool _isListening = false;
+  bool _shouldStop = false;
+  Function(String)? _currentOnResult;
   final _recognizedWordsController = StreamController<String>.broadcast();
 
   @override
@@ -22,11 +25,13 @@ class SpeechToTextService implements AudioInputService {
     
     try {
       _isInitialized = await _speechToText.initialize(
+        options: [SpeechToText.androidIntentLookup, SpeechToText.iosNoBluetooth],
         onError: (error) {
           print('Speech recognition error: ${error.errorMsg}');
         },
         onStatus: (status) {
           print('Speech recognition status: $status');
+          _isListening = (status == 'listening');
         },
       );
       return _isInitialized;
@@ -57,21 +62,33 @@ class SpeechToTextService implements AudioInputService {
     }
 
     try {
+      _shouldStop = false;
+      _currentOnResult = onResult;
+      print('Starting speech recognition...');
+      
       await _speechToText.listen(
         onResult: (result) {
+          if (_shouldStop) {
+            print('Ignoring results - user requested stop');
+            return;
+          }
+          
           final recognizedWords = result.recognizedWords;
-          if (recognizedWords.isNotEmpty) {
-            onResult(recognizedWords);
+          if (recognizedWords.isNotEmpty && _currentOnResult != null) {
+            _currentOnResult!(recognizedWords);
             _recognizedWordsController.add(recognizedWords);
           }
+          
+          print('Speech result: "$recognizedWords" (Final: ${result.finalResult})');
         },
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
         partialResults: true,
-        listenMode: ListenMode.confirmation,
-        cancelOnError: true,
+        listenMode: ListenMode.dictation,
+        cancelOnError: false,
       );
     } catch (e) {
+      print('Failed to start listening: $e');
       throw Exception('Failed to start listening: $e');
     }
   }
@@ -79,6 +96,10 @@ class SpeechToTextService implements AudioInputService {
   @override
   Future<void> stopListening() async {
     try {
+      _shouldStop = true;
+      _isListening = false;
+      _currentOnResult = null;
+      print('Explicitly stopping speech recognition...');
       await _speechToText.stop();
     } catch (e) {
       print('Failed to stop listening: $e');
@@ -95,6 +116,7 @@ class SpeechToTextService implements AudioInputService {
 
   void dispose() {
     _recognizedWordsController.close();
+    _currentOnResult = null;
     _speechToText.stop();
   }
 }

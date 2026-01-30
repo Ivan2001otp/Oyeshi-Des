@@ -81,8 +81,8 @@ class SpeechToTextService implements AudioInputService {
           
           print('Speech result: "$recognizedWords" (Final: ${result.finalResult})');
         },
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 5),
         partialResults: true,
         listenMode: ListenMode.dictation,
         cancelOnError: false,

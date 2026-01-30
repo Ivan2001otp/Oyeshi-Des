@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_state.dart';
@@ -13,15 +12,16 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   final String _userId;
   String _currentRecognizedText = '';
   final List<String> _partialResults = [];
+  final List<String> _allSpokenWords = []; // Track all spoken words
 
   AudioInputBloc({
     required AudioInputService audioService,
     required AIService aiService,
     required String userId,
-  })  : _audioService = audioService,
-        _aiService = aiService,
-        _userId = userId,
-        super(const AudioInputInitial()) {
+  }) : _audioService = audioService,
+       _aiService = aiService,
+       _userId = userId,
+       super(const AudioInputInitial()) {
     on<InitializeAudioInput>(_onInitialize);
     on<StartListening>(_onStartListening);
     on<StopListening>(_onStopListening);
@@ -66,8 +66,10 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
         return;
       }
 
+      // Clear all words when starting new recording
       _currentRecognizedText = '';
       _partialResults.clear();
+      _allSpokenWords.clear();
 
       emit(AudioInputListening(
         recognizedText: _currentRecognizedText,
@@ -77,13 +79,6 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
       await _audioService.startListening((recognizedWords) {
         add(AudioRecognized(recognizedWords));
       });
-
-      // If no speech detected after 3 seconds, show error
-      /*Future.delayed(const Duration(seconds: 3), () {
-        if (state is AudioInputListening && _currentRecognizedText.isEmpty) {
-          emit(const AudioInputError('No speech detected. Please speak clearly and try again.'));
-        }
-      });*/
     } catch (e) {
       emit(AudioInputError('Failed to start listening: $e'));
     }
@@ -95,11 +90,11 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   ) async {
     try {
       await _audioService.stopListening();
-      debugPrint('ds : Stop listening command received');
-
+      print('Stop listening command received');
+      
       // Wait a moment to ensure speech has actually stopped
       await Future.delayed(const Duration(milliseconds: 500));
-
+      
       if (_currentRecognizedText.isNotEmpty) {
         add(ProcessAudioText(_currentRecognizedText));
       } else {
@@ -118,29 +113,42 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     AudioRecognized event,
     Emitter<AudioInputState> emit,
   ) {
-    // Replace text instead of appending to show individual recognition results
-    _currentRecognizedText = event.recognizedText;
-
-    final words = event.recognizedText
-        .split(' ')
-        .where((word) => word.trim().isNotEmpty)
-        .toList();
-
-    for (final word in words) {
-      final isDuplicate = _partialResults
-          .any((existing) => existing.toLowerCase() == word.toLowerCase());
-
-      if (!isDuplicate) {
-        _partialResults.add(word);
-      }
-    }
+    final recognizedWords = event.recognizedText;
+    
+    // Extract new words from the current recognition
+    final newWords = _extractNewWords(recognizedWords);
+    
+    // Add new words to our accumulated list
+    _allSpokenWords.addAll(newWords);
+    
+    // Update current text to include all spoken words
+    _currentRecognizedText = _allSpokenWords.join(' ');
+    
+    // Update partial results for UI
+    _partialResults.clear();
+    _partialResults.addAll(_allSpokenWords);
 
     if (state is AudioInputListening) {
       emit(AudioInputListening(
         recognizedText: _currentRecognizedText,
-        partialResults: List<String>.from(_partialResults),
+        partialResults: _partialResults,
       ));
     }
+  }
+
+  List<String> _extractNewWords(String newText) {
+    // Split into individual words
+    final words = newText.toLowerCase().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
+    
+    // Filter out words we've already recorded
+    final uniqueWords = <String>[];
+    for (final word in words) {
+      if (!_allSpokenWords.any((existingWord) => existingWord.toLowerCase() == word)) {
+        uniqueWords.add(word);
+      }
+    }
+    
+    return uniqueWords;
   }
 
   Future<void> _onProcessAudioText(
@@ -150,18 +158,15 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     emit(const AudioInputLoading());
 
     try {
-      final parsedIngredients =
-          await _aiService.parseIngredientsFromText(event.audioText);
-
-      final ingredients = parsedIngredients
-          .map((name) => Ingredient(
-                id: const Uuid().v4(),
-                name: name.trim(),
-                category: _categorizeIngredient(name.trim()),
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              ))
-          .toList();
+      final parsedIngredients = await _aiService.parseIngredientsFromText(event.audioText);
+      
+      final ingredients = parsedIngredients.map((name) => Ingredient(
+        id: const Uuid().v4(),
+        name: name.trim(),
+        category: _categorizeIngredient(name.trim()),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      )).toList();
 
       emit(AudioInputCompleted(
         finalText: event.audioText,
@@ -178,38 +183,24 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   ) {
     _currentRecognizedText = '';
     _partialResults.clear();
+    _allSpokenWords.clear();
     emit(const AudioInputReady());
   }
 
   String _categorizeIngredient(String ingredientName) {
     final name = ingredientName.toLowerCase();
-
-    if (name.contains('milk') ||
-        name.contains('cheese') ||
-        name.contains('yogurt')) {
+    
+    if (name.contains('milk') || name.contains('cheese') || name.contains('yogurt')) {
       return 'Dairy';
-    } else if (name.contains('chicken') ||
-        name.contains('beef') ||
-        name.contains('pork') ||
-        name.contains('fish')) {
+    } else if (name.contains('chicken') || name.contains('beef') || name.contains('pork') || name.contains('fish')) {
       return 'Protein';
-    } else if (name.contains('tomato') ||
-        name.contains('onion') ||
-        name.contains('carrot') ||
-        name.contains('lettuce')) {
+    } else if (name.contains('tomato') || name.contains('onion') || name.contains('carrot') || name.contains('lettuce')) {
       return 'Vegetables';
-    } else if (name.contains('apple') ||
-        name.contains('banana') ||
-        name.contains('orange')) {
+    } else if (name.contains('apple') || name.contains('banana') || name.contains('orange')) {
       return 'Fruits';
-    } else if (name.contains('rice') ||
-        name.contains('pasta') ||
-        name.contains('bread')) {
+    } else if (name.contains('rice') || name.contains('pasta') || name.contains('bread')) {
       return 'Grains';
-    } else if (name.contains('oil') ||
-        name.contains('butter') ||
-        name.contains('salt') ||
-        name.contains('pepper')) {
+    } else if (name.contains('oil') || name.contains('butter') || name.contains('salt') || name.contains('pepper')) {
       return 'Pantry';
     } else {
       return 'Other';

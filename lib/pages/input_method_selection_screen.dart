@@ -9,6 +9,8 @@ import 'package:oyeshi_des/pages/audio_input_screen.dart';
 import 'package:oyeshi_des/config/dependency_injection.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 
+import 'ingredient_text_scan_screen.dart';
+
 class InputMethodSelectionScreen extends StatelessWidget {
   const InputMethodSelectionScreen({super.key});
 
@@ -94,7 +96,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
           icon: Icons.camera_alt,
           title: 'Camera Scan',
           description: 'Take a photo of ingredients',
-          onTap: () => _showComingSoon(context, 'Camera Scan'),
+          onTap: () => _navigateToAIreaderInputFromNotesTypeInput(context),
           color: Colors.green,
         ),
         const SizedBox(height: 16),
@@ -263,6 +265,22 @@ class InputMethodSelectionScreen extends StatelessWidget {
         return const SizedBox.shrink();
       },
     );
+  }
+
+  void _navigateToAIreaderInputFromNotesTypeInput(BuildContext context) {
+    Navigator.push( 
+      context, 
+      MaterialPageRoute( 
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            /*BlocProvider.value(
+              value: context.read<IngredientInputBloc>(),
+            ),*/
+          ], child: const IngredientTextScanScreen(),
+        )
+      )
+    );
+
   }
 
   void _navigateToTextInput(BuildContext context) {

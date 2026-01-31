@@ -7,27 +7,45 @@ import 'package:oyeshi_des/models/ingredient.dart';
 import '../bloc/text_scan/text_scan_bloc.dart';
 import '../bloc/text_scan/text_scan_event.dart';
 import '../bloc/text_scan/text_scan_state.dart';
+import '../services/ai_service.dart';
 
 class IngredientTextScanScreen extends StatefulWidget {
   const IngredientTextScanScreen({super.key});
 
   @override
-  State<IngredientTextScanScreen> createState() => _IngredientTextScanScreenState();
+  State<IngredientTextScanScreen> createState() =>
+      _IngredientTextScanScreenState();
 }
 
 class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
+  TextScanBloc? _textScanBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _textScanBloc = TextScanBloc(
+      aiService:
+          context.read<AIService>(), // Assuming AIService is provided above
+    )..add(const InitializeCamera());
+  }
+
+  @override
+  void dispose() {
+    _textScanBloc?.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TextScanBloc(
-        aiService: context.read(), // Assuming AIService is provided above
-      )..add(const InitializeCamera()),
+      create: (context) => _textScanBloc!,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Scan Handwritten List'),
+        /*appBar: AppBar(
+          title: const Text('Scan Handwritten List',style: TextStyle(fontSize: 12),),
+
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           elevation: 0,
-        ),
+        ),*/
         body: BlocConsumer<TextScanBloc, TextScanState>(
           listener: (context, state) {
             _handleStateChanges(context, state);
@@ -100,7 +118,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             Icon(
+            Icon(
               Icons.camera_alt_outlined,
               size: 80,
               color: Colors.red,
@@ -120,10 +138,13 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                context.read<TextScanBloc>().add(const RequestCameraPermission());
+                context
+                    .read<TextScanBloc>()
+                    .add(const RequestCameraPermission());
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
               ),
               child: const Text('Grant Permission'),
             ),
@@ -138,7 +159,8 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String error, {bool showRetry = false}) {
+  Widget _buildErrorState(BuildContext context, String error,
+      {bool showRetry = false}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -188,29 +210,29 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
           children: [
             // Camera preview
             CameraPreview(scanBloc.cameraController!),
-            
+
             // Camera overlay with guide
             _buildCameraOverlay(),
-            
+
             // Bottom controls
             Positioned(
-              bottom: 30,
+              bottom: 48,
               left: 0,
               right: 0,
               child: _buildCameraControls(context),
             ),
-            
+
             // Top controls
             Positioned(
-              top: 20,
+              top: 44,
               right: 20,
               child: _buildTopControls(context),
             ),
-            
+
             // Instructions
             Positioned(
-              top: 20,
-              left: 20,
+              top: 44,
+              left: 10,
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -222,7 +244,8 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                   children: [
                     Text(
                       '📝 How to scan:',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -241,33 +264,30 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
 
   Widget _buildCameraOverlay() {
     return IgnorePointer(
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
-        ),
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.green, width: 3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                'Align list within frame',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.8),
-                      blurRadius: 4,
-                      offset: const Offset(1, 1),
-                    ),
-                  ],
-                ),
+      child: Center(
+        child: Container(
+          margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * 0.15),
+          width: MediaQuery.of(context).size.width * 0.94,
+          height: MediaQuery.of(context).size.height * 0.65,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.green, width: 3),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              'Align list within frame',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.8),
+                    blurRadius: 4,
+                    offset: const Offset(1, 1),
+                  ),
+                ],
               ),
             ),
           ),
@@ -279,43 +299,61 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
   Widget _buildCameraControls(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      spacing: 40,
       children: [
         // Gallery button
         IconButton(
           onPressed: () {
             context.read<TextScanBloc>().add(const PickImageFromGallery());
           },
-          icon: const Icon(Icons.photo_library, size: 32, color: Colors.white),
+          icon: const Icon(Icons.photo_library,
+              size: 32, color: Colors.deepOrange),
           tooltip: 'Pick from gallery',
+          style: IconButton.styleFrom(
+            side: BorderSide(color: Colors.black, width: 3),
+            backgroundColor: Colors.black54,
+            padding: const EdgeInsets.all(12),
+          ),
         ),
-        
+
         // Capture button
         Container(
           width: 70,
           height: 70,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
+            border: Border.all(color: Colors.black, width: 3),
           ),
           child: IconButton(
             onPressed: () {
               context.read<TextScanBloc>().add(const CaptureImage());
             },
-            icon: const Icon(Icons.camera, size: 36, color: Colors.white),
+            icon: const Icon(Icons.camera_alt_outlined,
+                size: 36, color: Colors.white),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color.fromARGB(255, 101, 40, 176),
               padding: const EdgeInsets.all(8),
             ),
           ),
         ),
-        
+
         // Flash toggle
-        IconButton(
-          onPressed: () {
-            context.read<TextScanBloc>().add(const ToggleFlash());
-          },
-          icon: const Icon(Icons.flash_on, size: 32, color: Colors.white),
-          tooltip: 'Toggle flash',
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black, width: 3),
+          ),
+          child: IconButton(
+            onPressed: () {
+              context.read<TextScanBloc>().add(const ToggleFlash());
+            },
+            icon: const Icon(Icons.flash_on, size: 32, color: Colors.white),
+            tooltip: 'Toggle flash',
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black54,
+              padding: const EdgeInsets.all(8),
+            ),
+          ),
         ),
       ],
     );
@@ -325,7 +363,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
     return Row(
       children: [
         // Switch camera
-        IconButton(
+        /*IconButton(
           onPressed: () {
             context.read<TextScanBloc>().add(const SwitchCamera());
           },
@@ -333,6 +371,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
           tooltip: 'Switch camera',
         ),
         const SizedBox(width: 16),
+        */
         // Close button
         IconButton(
           onPressed: () => Navigator.pop(context),
@@ -353,7 +392,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             fit: BoxFit.contain,
           ),
         ),
-        
+
         // Processing overlay
         Container(
           color: Colors.black.withOpacity(0.5),
@@ -373,7 +412,9 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        context.read<TextScanBloc>().add(const CancelProcessing());
+                        context
+                            .read<TextScanBloc>()
+                            .add(const CancelProcessing());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -454,7 +495,8 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                     if (state.detectedText.isNotEmpty) ...[
                       const Text(
                         'Detected lines:',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.grey),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -479,7 +521,9 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    context.read<TextScanBloc>().add(EditExtractedText(state.extractedText));
+                    context
+                        .read<TextScanBloc>()
+                        .add(EditExtractedText(state.extractedText));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
@@ -493,7 +537,9 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    context.read<TextScanBloc>().add(ParseIngredients(state.extractedText));
+                    context
+                        .read<TextScanBloc>()
+                        .add(ParseIngredients(state.extractedText));
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -508,7 +554,8 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
     );
   }
 
-  void _showIngredientsResult(BuildContext context, List<String> ingredients, String originalText) {
+  void _showIngredientsResult(
+      BuildContext context, List<String> ingredients, String originalText) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -520,24 +567,28 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Original text:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Original text:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               Text(
                 originalText,
-                style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
+                style:
+                    const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
               ),
               const SizedBox(height: 16),
-              const Text('Parsed ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Parsed ingredients:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               ...ingredients.map((ingredient) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(ingredient)),
-                  ],
-                ),
-              )),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(ingredient)),
+                      ],
+                    ),
+                  )),
             ],
           ),
         ),
@@ -553,14 +604,16 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             onPressed: () {
               Navigator.of(dialogContext).pop();
 
-              final parsedIngredients = ingredients.map((name) => Ingredient(
-                id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(name)}',
-                name: name,
-                category: 'Scanned',
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              )).toList();
-              
+              final parsedIngredients = ingredients
+                  .map((name) => Ingredient(
+                        id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(name)}',
+                        name: name,
+                        category: 'Scanned',
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      ))
+                  .toList();
+
               Navigator.pop(context, parsedIngredients);
             },
             child: const Text('Use These Ingredients'),

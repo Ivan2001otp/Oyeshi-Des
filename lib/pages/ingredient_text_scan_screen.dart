@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
+import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
 import '../bloc/text_scan/text_scan_bloc.dart';
 import '../bloc/text_scan/text_scan_event.dart';
@@ -209,8 +210,9 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
         return Stack(
           children: [
             // Camera preview
-            CameraPreview(scanBloc.cameraController!),
-
+            SizedBox.expand(
+              child: CameraPreview(scanBloc.cameraController!),
+            ),
             // Camera overlay with guide
             _buildCameraOverlay(),
 
@@ -269,7 +271,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
           margin: EdgeInsets.only(
               bottom: MediaQuery.of(context).size.height * 0.15),
           width: MediaQuery.of(context).size.width * 0.94,
-          height: MediaQuery.of(context).size.height * 0.65,
+          height: MediaQuery.of(context).size.height * 0.75,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.green, width: 3),
             borderRadius: BorderRadius.circular(8),
@@ -297,65 +299,68 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
   }
 
   Widget _buildCameraControls(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      spacing: 40,
-      children: [
-        // Gallery button
-        IconButton(
-          onPressed: () {
-            context.read<TextScanBloc>().add(const PickImageFromGallery());
-          },
-          icon: const Icon(Icons.photo_library,
-              size: 32, color: Colors.deepOrange),
-          tooltip: 'Pick from gallery',
-          style: IconButton.styleFrom(
-            side: BorderSide(color: Colors.black, width: 3),
-            backgroundColor: Colors.black54,
-            padding: const EdgeInsets.all(12),
-          ),
-        ),
-
-        // Capture button
-        Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.black, width: 3),
-          ),
-          child: IconButton(
+    return Container(
+      color: Colors.black.withValues(alpha: 0.3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        spacing: 40,
+        children: [
+          // Gallery button
+          IconButton(
             onPressed: () {
-              context.read<TextScanBloc>().add(const CaptureImage());
+              context.read<TextScanBloc>().add(const PickImageFromGallery());
             },
-            icon: const Icon(Icons.camera_alt_outlined,
-                size: 36, color: Colors.white),
+            icon: const Icon(Icons.photo_library,
+                size: 32, color: Colors.deepOrange),
+            tooltip: 'Pick from gallery',
             style: IconButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 101, 40, 176),
-              padding: const EdgeInsets.all(8),
-            ),
-          ),
-        ),
-
-        // Flash toggle
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.black, width: 3),
-          ),
-          child: IconButton(
-            onPressed: () {
-              context.read<TextScanBloc>().add(const ToggleFlash());
-            },
-            icon: const Icon(Icons.flash_on, size: 32, color: Colors.white),
-            tooltip: 'Toggle flash',
-            style: IconButton.styleFrom(
+              side: BorderSide(color: Colors.black, width: 3),
               backgroundColor: Colors.black54,
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
             ),
           ),
-        ),
-      ],
+
+          // Capture button
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black, width: 3),
+            ),
+            child: IconButton(
+              onPressed: () {
+                context.read<TextScanBloc>().add(const CaptureImage());
+              },
+              icon: const Icon(Icons.camera_alt_outlined,
+                  size: 36, color: Colors.white),
+              style: IconButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 101, 40, 176),
+                padding: const EdgeInsets.all(8),
+              ),
+            ),
+          ),
+
+          // Flash toggle
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black, width: 3),
+            ),
+            child: IconButton(
+              onPressed: () {
+                context.read<TextScanBloc>().add(const ToggleFlash());
+              },
+              icon: const Icon(Icons.flash_on, size: 32, color: Colors.white),
+              tooltip: 'Toggle flash',
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black54,
+                padding: const EdgeInsets.all(8),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -614,7 +619,12 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                       ))
                   .toList();
 
-              Navigator.pop(context, parsedIngredients);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      MealPlanningScreen(ingredients: parsedIngredients),
+                ),
+              );
             },
             child: const Text('Use These Ingredients'),
           ),

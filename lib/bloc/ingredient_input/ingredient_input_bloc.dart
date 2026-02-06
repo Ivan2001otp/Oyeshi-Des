@@ -175,27 +175,6 @@ class IngredientInputBloc
     }
   }
 
-/*
-  Future<void> _onIngredientAdded(
-    IngredientAdded event,
-    Emitter<IngredientInputState> emit,
-  ) async {
-    try {
-      _tempIngredients.add(event.ingredient);
-      await _ingredientRepository.addIngredient(_userId, event.ingredient);
-
-      final currentState = state;
-      if (currentState is IngredientInputLoaded) {
-        emit(currentState.copyWith(
-          ingredients: List.from(_tempIngredients),
-        ));
-      }
-    } catch (e) {
-      emit(IngredientInputError('Failed to add ingredient: $e'));
-    }
-  }
-  */
-
   Future<void> _onGenerateMealPlan(
     GenerateMealPlanEvent event,
     Emitter<IngredientInputState> emit,

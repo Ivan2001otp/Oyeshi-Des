@@ -18,12 +18,12 @@ class IngredientTextChanged extends IngredientInputEvent {
 }
 
 class IngredientSubmitted extends IngredientInputEvent {
-  final String text;
+  final List<String> texts;
 
-  const IngredientSubmitted(this.text);
+  const IngredientSubmitted(this.texts);
 
   @override
-  List<Object> get props => [text];
+  List<Object> get props => [texts];
 }
 
 class IngredientAdded extends IngredientInputEvent {

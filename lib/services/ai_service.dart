@@ -20,7 +20,7 @@ class GeminiAIService implements AIService {
   final GenerativeModel _model;
   
   GeminiAIService(String apiKey) : _model = GenerativeModel(
-    model: 'gemini-1.5-pro',
+    model: 'gemini-3-flash-preview',
     apiKey: apiKey,
   );
 

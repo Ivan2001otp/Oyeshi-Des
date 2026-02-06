@@ -12,6 +12,7 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   final String _userId;
   String _currentRecognizedText = '';
   final List<String> _partialResults = [];
+  final List<String> _allSpokenWords = []; // Track all spoken words
 
   AudioInputBloc({
     required AudioInputService audioService,
@@ -34,7 +35,7 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     Emitter<AudioInputState> emit,
   ) async {
     emit(const AudioInputLoading());
-    
+
     try {
       final permissionsGranted = await _audioService.requestPermissions();
       if (!permissionsGranted) {
@@ -65,8 +66,10 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
         return;
       }
 
+      // Clear all words when starting new recording
       _currentRecognizedText = '';
       _partialResults.clear();
+      _allSpokenWords.clear();
 
       emit(AudioInputListening(
         recognizedText: _currentRecognizedText,
@@ -87,6 +90,10 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   ) async {
     try {
       await _audioService.stopListening();
+      print('Stop listening command received');
+      
+      // Wait a moment to ensure speech has actually stopped
+      await Future.delayed(const Duration(milliseconds: 500));
       
       if (_currentRecognizedText.isNotEmpty) {
         add(ProcessAudioText(_currentRecognizedText));
@@ -106,11 +113,20 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
     AudioRecognized event,
     Emitter<AudioInputState> emit,
   ) {
-    _currentRecognizedText = event.recognizedText;
+    final recognizedWords = event.recognizedText;
     
-    if (!_partialResults.contains(event.recognizedText)) {
-      _partialResults.add(event.recognizedText);
-    }
+    // Extract new words from the current recognition
+    final newWords = _extractNewWords(recognizedWords);
+    
+    // Add new words to our accumulated list
+    _allSpokenWords.addAll(newWords);
+    
+    // Update current text to include all spoken words
+    _currentRecognizedText = _allSpokenWords.join(' ');
+    
+    // Update partial results for UI
+    _partialResults.clear();
+    _partialResults.addAll(_allSpokenWords);
 
     if (state is AudioInputListening) {
       emit(AudioInputListening(
@@ -118,6 +134,21 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
         partialResults: _partialResults,
       ));
     }
+  }
+
+  List<String> _extractNewWords(String newText) {
+    // Split into individual words
+    final words = newText.toLowerCase().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
+    
+    // Filter out words we've already recorded
+    final uniqueWords = <String>[];
+    for (final word in words) {
+      if (!_allSpokenWords.any((existingWord) => existingWord.toLowerCase() == word)) {
+        uniqueWords.add(word);
+      }
+    }
+    
+    return uniqueWords;
   }
 
   Future<void> _onProcessAudioText(
@@ -152,6 +183,7 @@ class AudioInputBloc extends Bloc<AudioInputEvent, AudioInputState> {
   ) {
     _currentRecognizedText = '';
     _partialResults.clear();
+    _allSpokenWords.clear();
     emit(const AudioInputReady());
   }
 

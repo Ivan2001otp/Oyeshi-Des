@@ -8,6 +8,10 @@ import 'package:oyeshi_des/pages/ingredient_input_screen.dart';
 import 'package:oyeshi_des/pages/audio_input_screen.dart';
 import 'package:oyeshi_des/config/dependency_injection.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
+import 'package:oyeshi_des/services/ai_service.dart';
+
+import '../bloc/text_scan/text_scan_bloc.dart';
+import 'ingredient_text_scan_screen.dart';
 
 class InputMethodSelectionScreen extends StatelessWidget {
   const InputMethodSelectionScreen({super.key});
@@ -15,8 +19,12 @@ class InputMethodSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Oyeshi Des', style: TextStyle(fontWeight: FontWeight.w600),),
+        title: const Text(
+          'Oyeshi Des',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,
       ),
@@ -94,7 +102,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
           icon: Icons.camera_alt,
           title: 'Camera Scan',
           description: 'Take a photo of ingredients',
-          onTap: () => _showComingSoon(context, 'Camera Scan'),
+          onTap: () => _navigateToAIreaderInputFromNotesTypeInput(context),
           color: Colors.green,
         ),
         const SizedBox(height: 16),
@@ -262,6 +270,20 @@ class InputMethodSelectionScreen extends StatelessWidget {
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  void _navigateToAIreaderInputFromNotesTypeInput(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => TextScanBloc(
+            aiService: context.read<AIService>(),
+          ),
+          child: const IngredientTextScanScreen(),
+        ),
+      ),
     );
   }
 

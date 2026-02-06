@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
@@ -16,6 +17,8 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  Timer? _recordingTimer;
+  Duration _recordingDuration = Duration.zero;
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
   @override
   void dispose() {
     _pulseController.dispose();
+    _recordingTimer?.cancel();
     super.dispose();
   }
 
@@ -48,7 +52,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Voice Input'),
+        /*title: const Text(
+          'Oyeshi Des',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),*/
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,
       ),
@@ -56,24 +63,29 @@ class _AudioInputScreenState extends State<AudioInputScreen>
         listener: (context, state) {
           if (state is AudioInputListening) {
             _pulseController.repeat(reverse: true);
+            _startRecordingTimer();
           } else {
             _pulseController.stop();
             _pulseController.reset();
+            _stopRecordingTimer();
           }
 
           if (state is AudioInputCompleted) {
-            _showIngredientsResult(context, state.parsedIngredients, state.finalText);
+            _showIngredientsResult(
+                context, state.parsedIngredients, state.finalText);
           }
         },
         builder: (context, state) {
           return SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildTopSection(state),
-                  _buildMiddleSection(state),
+                  Expanded(
+                    child: _buildMiddleSection(state),
+                  ),
                   _buildBottomSection(state),
                 ],
               ),
@@ -90,11 +102,11 @@ class _AudioInputScreenState extends State<AudioInputScreen>
         const Text(
           'Voice Input',
           style: TextStyle(
-            fontSize: 32,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(
           _getSubtitle(state),
           style: TextStyle(
@@ -103,18 +115,21 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 4),
       ],
     );
   }
 
   Widget _buildMiddleSection(AudioInputState state) {
     if (state is AudioInputLoading) {
-      return const Column(
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Processing...'),
-        ],
+      return Center(
+        child: const Column(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Initializing speech recognition...'),
+          ],
+        ),
       );
     }
 
@@ -123,15 +138,28 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     }
 
     if (state is AudioInputError) {
-      return _buildErrorWidget(state.message);
+      return _buildErrorWidget(state.message, showRetry: true);
     }
 
-    return Column(
-      children: [
-        _buildVoiceVisualization(state),
-        const SizedBox(height: 32),
-        _buildRecognizedText(state),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildVoiceVisualization(state),
+          if (state is AudioInputListening) ...[
+            const SizedBox(height: 16),
+            Text(
+              _formatDuration(_recordingDuration),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+          const SizedBox(height: 32),
+          _buildRecognizedText(state),
+        ],
+      ),
     );
   }
 
@@ -141,18 +169,19 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (state is! AudioInputPermissionDenied && state is! AudioInputError)
           _buildControlButtons(state),
-        const SizedBox(height: 16),
-        _buildHelpText(),
+        // const SizedBox(height: 6),
+        // _buildHelpText(),
       ],
     );
   }
 
   Widget _buildVoiceVisualization(AudioInputState state) {
     final isListening = state is AudioInputListening;
-    
+
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
@@ -161,7 +190,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isListening 
+            color: isListening
                 ? Colors.red.withOpacity(0.1)
                 : Colors.blue.withOpacity(0.1),
             border: Border.all(
@@ -196,9 +225,14 @@ class _AudioInputScreenState extends State<AudioInputScreen>
       text = state.finalText;
     }
 
+    // Constrain the height to prevent overflow
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height *
+            0.3, // Maximum height to prevent screen overflow
+      ),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12),
@@ -206,27 +240,37 @@ class _AudioInputScreenState extends State<AudioInputScreen>
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'Recognized Text:',
+            'Current Recognition:',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            text.isEmpty ? 'Start speaking...' : text,
-            style: TextStyle(
-              fontSize: 16,
-              color: text.isEmpty ? Colors.grey : Colors.black,
-              height: 1.5,
+          // Constrain current text area
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: 80, // Max height for current text
+            ),
+            child: Text(
+              text.isEmpty ? 'Start speaking...' : text,
+              style: TextStyle(
+                fontSize: 16,
+                color: text.isEmpty ? Colors.grey : Colors.black,
+                height: 1.5,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
             ),
           ),
+       
           if (partialResults.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             const Text(
-              'Partial Results:',
+              'Individual Words:',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
@@ -234,19 +278,34 @@ class _AudioInputScreenState extends State<AudioInputScreen>
               ),
             ),
             const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: partialResults.map((result) {
-                return Chip(
-                  label: Text(
-                    result,
-                    style: const TextStyle(fontSize: 12),
+            // Constrain the word list with scrollable container
+            Container(
+                constraints: BoxConstraints(maxHeight: 120, minHeight: 40),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4,
+                    alignment: WrapAlignment.start,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: partialResults.map((result) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 1),
+                        child: Chip(
+                          backgroundColor: Colors.green.shade300,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          label: Text(
+                            result,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 8),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  backgroundColor: Colors.blue.shade100,
-                );
-              }).toList(),
-            ),
+                ),             
+                ),
           ],
         ],
       ),
@@ -257,11 +316,12 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     final isListening = state is AudioInputListening;
     final hasText = state is AudioInputReady && state.recognizedText.isNotEmpty;
     final isCompleted = state is AudioInputCompleted;
+    final isError = state is AudioInputError;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        if (!isListening && !isCompleted)
+        if (!isListening && !isCompleted && !isError)
           ElevatedButton.icon(
             onPressed: () => _startListening(),
             icon: const Icon(Icons.mic),
@@ -274,7 +334,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ),
         if (isListening)
           ElevatedButton.icon(
-            onPressed: () => _stopListening(),
+            onPressed: () => _confirmStopRecording(),
             icon: const Icon(Icons.stop),
             label: const Text('Stop Recording'),
             style: ElevatedButton.styleFrom(
@@ -283,7 +343,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
-        if (hasText && !isListening)
+        if (hasText && !isListening && !isError)
           ElevatedButton.icon(
             onPressed: () => _processText(state.recognizedText),
             icon: const Icon(Icons.check),
@@ -299,6 +359,17 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             onPressed: () => _resetRecording(),
             icon: const Icon(Icons.refresh),
             label: const Text('New Recording'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        if (isError)
+          ElevatedButton.icon(
+            onPressed: () => _retry(),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
@@ -340,7 +411,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     );
   }
 
-  Widget _buildErrorWidget(String message) {
+  Widget _buildErrorWidget(String message, {bool showRetry = false}) {
     return Column(
       children: [
         const Icon(
@@ -375,16 +446,26 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     return Column(
       children: [
         Text(
-          '💡 Tip: Speak clearly and list ingredients one by one',
+          '🎤 Troubleshooting:',
           style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[700],
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
-          'Example: "I have tomatoes, onions, chicken breast, and rice"',
+          '• Speak clearly and close to device\n• Minimize background noise\n• Ensure internet connection\n• Grant microphone permissions',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          '💡 Each word appears individually in the list below',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey[500],
@@ -402,7 +483,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     } else if (state is AudioInputLoading) {
       return 'Initializing voice recognition...';
     } else if (state is AudioInputListening) {
-      return 'Listening... Speak clearly';
+      return 'Listening continuously... Stop when you\'re done';
     } else if (state is AudioInputReady) {
       return 'Tap Start Recording to begin';
     } else if (state is AudioInputPermissionDenied) {
@@ -435,7 +516,53 @@ class _AudioInputScreenState extends State<AudioInputScreen>
   }
 
   void _resetRecording() {
+    _stopRecordingTimer();
+    _recordingDuration = Duration.zero;
     context.read<AudioInputBloc>().add(const ClearAudioInput());
+  }
+
+  void _confirmStopRecording() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Stop Recording'),
+        content: const Text('Are you sure you want to stop recording?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _stopListening();
+            },
+            child: const Text('Stop'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startRecordingTimer() {
+    _recordingDuration = Duration.zero;
+    _recordingTimer?.cancel();
+    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _recordingDuration = Duration(seconds: timer.tick);
+      });
+    });
+  }
+
+  void _stopRecordingTimer() {
+    _recordingTimer?.cancel();
+    _recordingTimer = null;
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   void _showIngredientsResult(
@@ -462,20 +589,20 @@ class _AudioInputScreenState extends State<AudioInputScreen>
               const Text('Parsed ingredients:'),
               const SizedBox(height: 8),
               ...ingredients.map((ingredient) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(ingredient.name)),
-                    Chip(
-                      label: Text(ingredient.category),
-                      backgroundColor: Colors.blue.shade100,
-                      labelStyle: const TextStyle(fontSize: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(ingredient.name)),
+                        Chip(
+                          label: Text(ingredient.category),
+                          backgroundColor: Colors.blue.shade100,
+                          labelStyle: const TextStyle(fontSize: 12),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )),
+                  )),
             ],
           ),
         ),

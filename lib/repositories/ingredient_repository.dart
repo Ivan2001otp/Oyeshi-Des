@@ -4,7 +4,7 @@ import 'package:oyeshi_des/models/ingredient.dart';
 abstract class IngredientRepository {
   Future<List<Ingredient>> getIngredients(String userId);
   Future<Ingredient?> getIngredient(String userId, String ingredientId);
-  Future<void> addIngredient(String userId, Ingredient ingredient);
+  Future<void> addIngredients(String userId, List<Ingredient> ingredients);
   Future<void> updateIngredient(String userId, Ingredient ingredient);
   Future<void> deleteIngredient(String userId, String ingredientId);
   Future<List<Ingredient>> searchIngredients(String userId, String query);
@@ -26,9 +26,7 @@ class FirebaseIngredientRepository implements IngredientRepository {
           .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs
-          .map((doc) => Ingredient.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Ingredient.fromFirestore(doc)).toList();
     } catch (e) {
       throw Exception('Failed to fetch ingredients: $e');
     }
@@ -51,16 +49,21 @@ class FirebaseIngredientRepository implements IngredientRepository {
   }
 
   @override
-  Future<void> addIngredient(String userId, Ingredient ingredient) async {
+  Future<void> addIngredients(
+      String userId, List<Ingredient> ingredients) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('ingredients')
-          .doc(ingredient.id)
-          .set(ingredient.toMap());
+      final batch = _firestore.batch();
+      final ingredientsRef =
+          _firestore.collection("users").doc(userId).collection("ingredients");
+
+      for (final ingredient in ingredients) {
+        final docRef = ingredientsRef.doc(ingredient.id);
+        batch.set(docRef, ingredient.toMap());
+      }
+
+      await batch.commit();
     } catch (e) {
-      throw Exception('Failed to add ingredient: $e');
+      throw Exception('Failed to add ingredients: $e');
     }
   }
 
@@ -93,7 +96,8 @@ class FirebaseIngredientRepository implements IngredientRepository {
   }
 
   @override
-  Future<List<Ingredient>> searchIngredients(String userId, String query) async {
+  Future<List<Ingredient>> searchIngredients(
+      String userId, String query) async {
     try {
       final snapshot = await _firestore
           .collection('users')
@@ -103,9 +107,7 @@ class FirebaseIngredientRepository implements IngredientRepository {
           .where('name', isLessThanOrEqualTo: query + '\uf8ff')
           .get();
 
-      return snapshot.docs
-          .map((doc) => Ingredient.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Ingredient.fromFirestore(doc)).toList();
     } catch (e) {
       throw Exception('Failed to search ingredients: $e');
     }
@@ -119,8 +121,7 @@ class FirebaseIngredientRepository implements IngredientRepository {
         .collection('ingredients')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Ingredient.fromFirestore(doc))
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Ingredient.fromFirestore(doc)).toList());
   }
 }

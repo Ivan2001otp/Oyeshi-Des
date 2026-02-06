@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oyeshi_des/firebase_options.dart';
@@ -20,7 +20,7 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerLazySingleton<AIService>(
-    () => GeminiAIService('AIzaSyAkv-YXTCLyL8N1d1fqlTor1o4vhgHeG4Q'),
+    () => GeminiAIService(dotenv.get("GOOGLE_API_KEY")),
   );
 
   getIt.registerLazySingleton<AudioInputService>(

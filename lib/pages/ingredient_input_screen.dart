@@ -13,34 +13,38 @@ class IngredientInputScreen extends StatefulWidget {
 }
 
 class _IngredientInputScreenState extends State<IngredientInputScreen> {
-  final TextEditingController _textController = TextEditingController();
-  final TextEditingController _bulkTextController = TextEditingController();
-  bool _isBulkMode = false;
+  final List<TextEditingController> _ingredientControllers = [];
 
   @override
   void dispose() {
-    _textController.dispose();
-    _bulkTextController.dispose();
+    for (var controller in _ingredientControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Add Ingredients'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          IconButton(
+          /*IconButton(
             icon: Icon(_isBulkMode ? Icons.check_box : Icons.list_alt),
             onPressed: () {
               setState(() {
                 _isBulkMode = !_isBulkMode;
               });
             },
-          ),
-          if (context.watch<IngredientInputBloc>().state is IngredientInputLoaded &&
-              (context.watch<IngredientInputBloc>().state as IngredientInputLoaded).ingredients.isNotEmpty)
+          ),*/
+          if (context.watch<IngredientInputBloc>().state
+                  is IngredientInputLoaded &&
+              (context.watch<IngredientInputBloc>().state
+                      as IngredientInputLoaded)
+                  .ingredients
+                  .isNotEmpty)
             IconButton(
               icon: const Icon(Icons.restaurant_menu),
               onPressed: () => _showMealPlanDialog(context),
@@ -66,8 +70,8 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildInputSection(context),
-              const SizedBox(height: 24),
-              _buildIngredientsList(context),
+              // const SizedBox(height: 24),
+              // _buildIngredientsList(context),
             ],
           ),
         ),
@@ -75,132 +79,156 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
     );
   }
 
-  Widget _buildInputSection(BuildContext context) {
-    if (_isBulkMode) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Enter multiple ingredients (one per line):',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+
+void _addTextController(BuildContext context) {
+  if (_ingredientControllers.length >= 20) {
+    // Optional: Show a snackbar message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Max 20 ingredients allowed'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
+  
+  setState(() {
+    _ingredientControllers.add(TextEditingController());
+  });
+}
+
+
+Widget _buildInputSection(BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const Text(
+        'Add an ingredient:',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      const SizedBox(height: 4),
+      
+      // Scrollable list with max height constraint
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.4 ,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ..._ingredientControllers.asMap().entries.map((entry) {
+                final index = entry.key;
+                final controller = entry.value;
+                
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.name,
+                          minLines: 1,
+                          controller: controller,
+                          maxLength: 20,
+                          decoration: const InputDecoration(
+                            hintText: 'e.g. Eggs',
+                            icon: Icon(Icons.local_dining_outlined),
+                            border: OutlineInputBorder(),
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            controller.dispose();
+                            _ingredientControllers.removeAt(index);
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _bulkTextController,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'Tomatoes\nOnions\nChicken breast\nRice\nGarlic',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () => _parseBulkIngredients(context),
-            child: const Text('Parse Ingredients'),
-          ),
-        ],
-      );
+        ),
+      ),
+      
+      const SizedBox(height: 8),
+      
+      // Show counter and limit message
+      Text(
+        '${_ingredientControllers.length}/20 ingredients',
+        style: TextStyle(
+          fontSize: 12,
+          color: _ingredientControllers.length >= 20 ? Colors.red : Colors.grey,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      
+      const SizedBox(height: 8),
+      
+      ElevatedButton(
+        onPressed: _ingredientControllers.length >= 20 
+            ? null // Disable when limit reached
+            : () => _addTextController(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          disabledBackgroundColor: Colors.grey,
+        ),
+        child: const Text(
+          'Add Ingredient +', 
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      
+      const SizedBox(height: 12),
+      
+      TextButton.icon(
+        onPressed: _ingredientControllers.isEmpty 
+            ? null // Disable if no ingredients
+            : () async {
+                _submitIngredientList(context);
+              },
+        icon: const Icon(Icons.restaurant),
+        label: const Text("Generate Meal Plans"),
+      ),
+    ],
+  );
+}
+/*
+  void _addTextController(BuildContext ctx) {
+    setState(() {
+      _ingredientControllers.add(TextEditingController());
+    });
+  }
+*/
+  void _submitIngredientList(BuildContext ctx) {
+    List<String> ingredients = [];
+
+    for (var controller in _ingredientControllers) {
+      ingredients.add(controller.text.trim());
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Add an ingredient:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _textController,
-          decoration: const InputDecoration(
-            hintText: 'e.g., tomatoes, chicken breast, rice',
-            border: OutlineInputBorder(),
-            suffixIcon: Icon(Icons.add),
-          ),
-          onSubmitted: (value) => _addSingleIngredient(context, value),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: () => _addSingleIngredient(context, _textController.text),
-          child: const Text('Add Ingredient'),
-        ),
-      ],
-    );
+    context.read<IngredientInputBloc>().add(IngredientSubmitted(ingredients));
   }
 
-  Widget _buildIngredientsList(BuildContext context) {
-    return BlocBuilder<IngredientInputBloc, IngredientInputState>(
-      builder: (context, state) {
-        if (state is IngredientInputLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (state is! IngredientInputLoaded) {
-          return const Center(child: Text('Start adding ingredients!'));
-        }
-
-        if (state.ingredients.isEmpty) {
-          return const Center(
-            child: Text(
-              'No ingredients added yet',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          );
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Added Ingredients (${state.ingredients.length})',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                TextButton(
-                  onPressed: () => _clearAllIngredients(context),
-                  child: const Text('Clear All'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: state.ingredients.length,
-                itemBuilder: (context, index) {
-                  final ingredient = state.ingredients[index];
-                  return _IngredientTile(
-                    ingredient: ingredient,
-                    onRemove: () => _removeIngredient(context, ingredient.id),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _addSingleIngredient(BuildContext context, String text) {
+  /*void _addSingleIngredient(BuildContext context, String text) {
     if (text.trim().isEmpty) return;
-    
+
     context.read<IngredientInputBloc>().add(IngredientSubmitted(text.trim()));
     _textController.clear();
-  }
+  }*/
 
-  void _parseBulkIngredients(BuildContext context) {
-    final text = _bulkTextController.text.trim();
-    if (text.isEmpty) return;
-    
-    context.read<IngredientInputBloc>().add(ParseIngredientsFromText(text));
-    _bulkTextController.clear();
-  }
-
-  void _removeIngredient(BuildContext context, String ingredientId) {
+  /*void _removeIngredient(BuildContext context, String ingredientId) {
     context.read<IngredientInputBloc>().add(RemoveIngredient(ingredientId));
-  }
+  }*/
 
   void _clearAllIngredients(BuildContext context) {
     context.read<IngredientInputBloc>().add(ClearIngredients());
@@ -212,7 +240,8 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Generate Meal Plan'),
-          content: const Text('Generate recipes based on your available ingredients?'),
+          content: const Text(
+              'Generate recipes based on your available ingredients?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
@@ -287,7 +316,8 @@ class _IngredientTile extends StatelessWidget {
 class MealPlanResultsScreen extends StatelessWidget {
   final List recipes;
 
-  const MealPlanResultsScreen({Key? key, required this.recipes}) : super(key: key);
+  const MealPlanResultsScreen({Key? key, required this.recipes})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +338,8 @@ class MealPlanResultsScreen extends StatelessWidget {
                 children: [
                   Text(
                     recipe.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(recipe.description),
@@ -318,12 +349,17 @@ class MealPlanResultsScreen extends StatelessWidget {
                   Text('Cook Time: ${recipe.cookTimeMinutes} min'),
                   Text('Servings: ${recipe.servings}'),
                   const SizedBox(height: 8),
-                  const Text('Ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...recipe.ingredients.map((ingredient) => Text('• $ingredient')),
+                  const Text('Ingredients:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...recipe.ingredients
+                      .map((ingredient) => Text('• $ingredient')),
                   const SizedBox(height: 8),
-                  const Text('Instructions:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...recipe.instructions.asMap().entries.map((entry) => 
-                    Text('${entry.key + 1}. ${entry.value}')),
+                  const Text('Instructions:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...recipe.instructions
+                      .asMap()
+                      .entries
+                      .map((entry) => Text('${entry.key + 1}. ${entry.value}')),
                 ],
               ),
             ),

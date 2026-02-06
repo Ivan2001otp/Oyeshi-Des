@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:oyeshi_des/bloc/text_scan/text_scan_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_state.dart';
@@ -13,6 +15,7 @@ import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   await setupApp();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

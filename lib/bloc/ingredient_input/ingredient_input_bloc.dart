@@ -7,7 +7,8 @@ import 'package:oyeshi_des/services/ai_service.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:uuid/uuid.dart';
 
-class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputState> {
+class IngredientInputBloc
+    extends Bloc<IngredientInputEvent, IngredientInputState> {
   final IngredientRepository _ingredientRepository;
   final AIService _aiService;
   final String _userId;
@@ -17,16 +18,16 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     required IngredientRepository ingredientRepository,
     required AIService aiService,
     required String userId,
-  }) : _ingredientRepository = ingredientRepository,
-       _aiService = aiService,
-       _userId = userId,
-       super(const IngredientInputInitial()) {
+  })  : _ingredientRepository = ingredientRepository,
+        _aiService = aiService,
+        _userId = userId,
+        super(const IngredientInputInitial()) {
     on<IngredientTextChanged>(_onTextChanged);
     on<IngredientSubmitted>(_onIngredientSubmitted);
-    on<ParseIngredientsFromText>(_onParseIngredientsFromText);
+    // on<ParseIngredientsFromText>(_onParseIngredientsFromText);
     on<ClearIngredients>(_onClearIngredients);
     on<RemoveIngredient>(_onRemoveIngredient);
-    on<IngredientAdded>(_onIngredientAdded);
+    // on<IngredientAdded>(_onIngredientAdded);
     on<GenerateMealPlanEvent>(_onGenerateMealPlan);
   }
 
@@ -49,11 +50,28 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     IngredientSubmitted event,
     Emitter<IngredientInputState> emit,
   ) async {
-    if (event.text.trim().isEmpty) return;
+    // if (event.text.trim().isEmpty) return;
+    if (event.texts.isEmpty) return;
 
     emit(const IngredientInputLoading());
-
+    
     try {
+
+      for (final text in event.texts) {
+
+        if (text.trim().isEmpty) continue;
+        
+        final foodIngredient = Ingredient(
+          id: const Uuid().v4(),
+          name: text.trim(),
+          category: _categorizeIngredient(text.trim()),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        _tempIngredients.add(foodIngredient);
+      }
+/*
       final ingredient = Ingredient(
         id: const Uuid().v4(),
         name: event.text.trim(),
@@ -63,7 +81,7 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
       );
 
       _tempIngredients.add(ingredient);
-      
+*/
       final currentState = state;
       if (currentState is IngredientInputLoaded) {
         emit(currentState.copyWith(
@@ -77,12 +95,12 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
         ));
       }
 
-      await _ingredientRepository.addIngredient(_userId, ingredient);
+      await _ingredientRepository.addIngredients(_userId, _tempIngredients);
     } catch (e) {
       emit(IngredientInputError('Failed to add ingredient: $e'));
     }
   }
-
+/*
   Future<void> _onParseIngredientsFromText(
     ParseIngredientsFromText event,
     Emitter<IngredientInputState> emit,
@@ -92,15 +110,18 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     emit(const IngredientInputLoading());
 
     try {
-      final parsedIngredients = await _aiService.parseIngredientsFromText(event.text);
-      
-      final ingredients = parsedIngredients.map((name) => Ingredient(
-        id: const Uuid().v4(),
-        name: name.trim(),
-        category: _categorizeIngredient(name.trim()),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      )).toList();
+      final parsedIngredients =
+          await _aiService.parseIngredientsFromText(event.text);
+
+      final ingredients = parsedIngredients
+          .map((name) => Ingredient(
+                id: const Uuid().v4(),
+                name: name.trim(),
+                category: _categorizeIngredient(name.trim()),
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ))
+          .toList();
 
       for (final ingredient in ingredients) {
         _tempIngredients.add(ingredient);
@@ -125,7 +146,7 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
       emit(IngredientInputError('Failed to parse ingredients: $e'));
     }
   }
-
+*/
   Future<void> _onClearIngredients(
     ClearIngredients event,
     Emitter<IngredientInputState> emit,
@@ -139,7 +160,8 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     Emitter<IngredientInputState> emit,
   ) async {
     try {
-      _tempIngredients.removeWhere((ingredient) => ingredient.id == event.ingredientId);
+      _tempIngredients
+          .removeWhere((ingredient) => ingredient.id == event.ingredientId);
       await _ingredientRepository.deleteIngredient(_userId, event.ingredientId);
 
       final currentState = state;
@@ -153,6 +175,7 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     }
   }
 
+/*
   Future<void> _onIngredientAdded(
     IngredientAdded event,
     Emitter<IngredientInputState> emit,
@@ -171,13 +194,15 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
       emit(IngredientInputError('Failed to add ingredient: $e'));
     }
   }
+  */
 
   Future<void> _onGenerateMealPlan(
     GenerateMealPlanEvent event,
     Emitter<IngredientInputState> emit,
   ) async {
     if (_tempIngredients.isEmpty) {
-      emit(const IngredientInputError('No ingredients available for meal plan'));
+      emit(
+          const IngredientInputError('No ingredients available for meal plan'));
       return;
     }
 
@@ -198,7 +223,7 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
     }
   }
 
-    void generateMealPlan({
+  void generateMealPlan({
     required List<String> dietaryRestrictions,
     required List<String> allergies,
     required List<String> dislikedIngredients,
@@ -218,18 +243,33 @@ class IngredientInputBloc extends Bloc<IngredientInputEvent, IngredientInputStat
 
   String _categorizeIngredient(String ingredientName) {
     final name = ingredientName.toLowerCase();
-    
-    if (name.contains('milk') || name.contains('cheese') || name.contains('yogurt')) {
+
+    if (name.contains('milk') ||
+        name.contains('cheese') ||
+        name.contains('yogurt')) {
       return 'Dairy';
-    } else if (name.contains('chicken') || name.contains('beef') || name.contains('pork') || name.contains('fish')) {
+    } else if (name.contains('chicken') ||
+        name.contains('beef') ||
+        name.contains('pork') ||
+        name.contains('fish')) {
       return 'Protein';
-    } else if (name.contains('tomato') || name.contains('onion') || name.contains('carrot') || name.contains('lettuce')) {
+    } else if (name.contains('tomato') ||
+        name.contains('onion') ||
+        name.contains('carrot') ||
+        name.contains('lettuce')) {
       return 'Vegetables';
-    } else if (name.contains('apple') || name.contains('banana') || name.contains('orange')) {
+    } else if (name.contains('apple') ||
+        name.contains('banana') ||
+        name.contains('orange')) {
       return 'Fruits';
-    } else if (name.contains('rice') || name.contains('pasta') || name.contains('bread')) {
+    } else if (name.contains('rice') ||
+        name.contains('pasta') ||
+        name.contains('bread')) {
       return 'Grains';
-    } else if (name.contains('oil') || name.contains('butter') || name.contains('salt') || name.contains('pepper')) {
+    } else if (name.contains('oil') ||
+        name.contains('butter') ||
+        name.contains('salt') ||
+        name.contains('pepper')) {
       return 'Pantry';
     } else {
       return 'Other';

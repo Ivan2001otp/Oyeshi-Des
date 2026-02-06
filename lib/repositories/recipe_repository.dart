@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:oyeshi_des/config/dependency_injection.dart';
 import 'package:oyeshi_des/models/recipe.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 
@@ -32,8 +35,26 @@ class RecipeRepositoryImpl implements RecipeRepository {
   }
 
   @override
-  Future<void> saveRecipe(Recipe recipe) async {
-    throw UnimplementedError('Firestore implementation needed');
+  Future<bool> saveRecipe(Recipe recipe) async {
+    debugPrint('Saving recipe: ${recipe.name}');
+
+    final firestoreInstance = getIt<FirebaseFirestore>();
+
+    try {
+      final batch = firestoreInstance.batch();
+      final ingredientsRef = firestoreInstance
+          .collection("users")
+          .doc("demo_user")
+          .collection("bookmarked");
+
+      final docRef = ingredientsRef.doc(recipe.id);
+      batch.set(docRef, recipe.toMap());
+      await batch.commit();
+      return true;
+    } catch (e) {
+      debugPrint('Failed to save recipe: $e');
+      return false;
+    }
   }
 
   @override

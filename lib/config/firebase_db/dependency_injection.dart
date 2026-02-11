@@ -7,9 +7,9 @@ import 'package:oyeshi_des/firebase_options.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 import 'package:oyeshi_des/services/audio_input_service.dart';
-import 'package:oyeshi_des/config/firebase_config.dart';
+import 'package:oyeshi_des/config/firebase_db/firebase_config.dart';
 
-import '../repositories/recipe_repository.dart';
+import '../../repositories/recipe_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 

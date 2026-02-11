@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/models/recipe.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 
 import '../bloc/reciepe_items/meal_plan_bloc.dart';
 import '../bloc/reciepe_items/meal_plan_event.dart';

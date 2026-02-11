@@ -5,7 +5,7 @@ import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
 import 'package:oyeshi_des/pages/ingredient_input_screen.dart';
 import 'package:oyeshi_des/pages/audio_input_screen.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 

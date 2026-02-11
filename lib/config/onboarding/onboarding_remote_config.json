@@ -1,0 +1,104 @@
+{
+  "onboarding_config": {
+    "version": "1.0",
+    "active": true,
+    "total": 7,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "multiple_choice",
+        "text": "How often does your weekly grocery shop end up with unused items that go to waste?",
+        "options": [
+          { "id": "a", "text": "Almost every week – it's frustrating." },
+          { "id": "b", "text": "Every other week." },
+          { "id": "c", "text": "Rarely, I'm pretty careful." },
+          { "id": "d", "text": "I don't really track it." }
+        ],
+        "next_step": "q2"
+      },
+      {
+        "id": "q2",
+        "type": "multiple_choice",
+        "text": "Think of the last thing you had to throw away. What was it most likely?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fresh greens or herbs (lettuce, spinach, cilantro)."
+          },
+          { "id": "b", "text": "Leftovers from a meal I got tired of." },
+          { "id": "c", "text": "Fruits that ripened too fast." },
+          {
+            "id": "d",
+            "text": "That 'special' ingredient I bought for one recipe."
+          }
+        ],
+        "next_step": "q3"
+      },
+      {
+        "id": "q3",
+        "type": "multiple_choice",
+        "text": "Let's talk numbers. What's your 'waste line' – the monthly cost of thrown-away food you're comfortable with?",
+        "options": [
+          { "id": "a", "text": "$0 – I want to eliminate waste." },
+          { "id": "b", "text": "Under $20." },
+          { "id": "c", "text": "$20-$50 – but I'd like it lower." },
+          { "id": "d", "text": "I avoid thinking about it, honestly." }
+        ],
+        "next_step": "q4"
+      },
+      {
+        "id": "q4",
+        "type": "multiple_choice",
+        "text": "Be brutally honest. Your actual waste is probably closer to...",
+        "options": [
+          { "id": "a", "text": "2-3 times that amount. It adds up silently." },
+          { "id": "b", "text": "About right, but it feels like more." },
+          { "id": "c", "text": "I really have no idea." }
+        ],
+        "next_step": "q5"
+      },
+      {
+        "id": "q5",
+        "type": "multiple_choice",
+        "text": "What's more scarce for you: the money lost to waste, or the time/mental energy to plan to prevent it?",
+        "options": [
+          { "id": "a", "text": "The money – every dollar counts." },
+          {
+            "id": "b",
+            "text": "The time/energy – I'm too busy to plan perfectly."
+          },
+          { "id": "c", "text": "Both are equally scarce!" }
+        ],
+        "next_step": "q6"
+      },
+      {
+        "id": "q6",
+        "type": "multiple_choice",
+        "text": "Which sounds more like you?",
+        "options": [
+          {
+            "id": "a",
+            "text": "I'm a pragmatic planner who hates inefficiency."
+          },
+          {
+            "id": "b",
+            "text": "I'm an adventurous cook who hates being bored."
+          },
+          {
+            "id": "c",
+            "text": "I'm a conscientious person who tries to reduce waste."
+          },
+          { "id": "d", "text": "I'm just someone who wants easy, good food." }
+        ],
+        "next_step": "q7"
+      },
+      {
+        "id": "q7",
+        "type": "final_cta",
+        "text": "You've just described the exact problem we exist to solve. Are you ready to finally fix it?",
+        "button_text": "Stop My Food Waste Now >>",
+        "next_step": "paywall"
+      }
+    ]
+  }
+}

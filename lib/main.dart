@@ -11,7 +11,7 @@ import 'package:oyeshi_des/repositories/recipe_repository.dart';
 import 'package:oyeshi_des/themes/app_theme.dart';
 import 'package:oyeshi_des/pages/input_method_selection_screen.dart';
 import 'package:oyeshi_des/widgets/no_glow_scroll_behaviour.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 

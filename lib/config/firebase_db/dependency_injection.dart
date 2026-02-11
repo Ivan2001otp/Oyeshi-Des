@@ -10,6 +10,7 @@ import 'package:oyeshi_des/services/audio_input_service.dart';
 import 'package:oyeshi_des/config/firebase_db/firebase_config.dart';
 
 import '../../repositories/recipe_repository.dart';
+import '../onboarding/remote_config.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -26,13 +27,12 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerSingleton<RecipeRepositoryImpl>(
-  RecipeRepositoryImpl(),
-);
+    RecipeRepositoryImpl(),
+  );
 
   getIt.registerLazySingleton<AIService>(
     () => GeminiAIService(dotenv.get("GOOGLE_API_KEY")),
   );
-  
 
   getIt.registerLazySingleton<AudioInputService>(
     () => SpeechToTextService(),
@@ -46,7 +46,8 @@ Future<void> setupApp() async {
     options: DefaultFirebaseOptions.currentPlatform,
     name: "oyeshi-70387",
   );
-
+  
+  await RemoteConfigService().initialize();
   await configureDependencies();
 }
 

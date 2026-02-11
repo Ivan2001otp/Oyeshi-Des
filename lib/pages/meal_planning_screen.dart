@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/models/recipe.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 
 import '../bloc/reciepe_items/meal_plan_bloc.dart';
 import '../bloc/reciepe_items/meal_plan_event.dart';
 import '../bloc/reciepe_items/meal_plan_state.dart';
+import '../repositories/recipe_repository.dart';
 
 class MealPlanningScreen extends StatelessWidget {
   final List<Ingredient> ingredients;
@@ -28,7 +29,10 @@ class MealPlanningScreen extends StatelessWidget {
         )),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Meal Planning'),
+          title: const Text(
+            'Meal Planning',
+            style: TextStyle(fontSize: 14),
+          ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
@@ -100,7 +104,7 @@ class MealPlanningScreen extends StatelessWidget {
           child: Row(
             children: [
               const Icon(Icons.restaurant_menu, color: Colors.green),
-              const SizedBox(width: 10),
+              const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   '${recipes.length} Delicious Recipes Found',
@@ -114,8 +118,8 @@ class MealPlanningScreen extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 onPressed: () {
                   context.read<MealPlanBloc>().add(
-                    GenerateMealPlan(ingredients: ingredients),
-                  );
+                        GenerateMealPlan(ingredients: ingredients),
+                      );
                 },
                 tooltip: 'Generate new recipes',
               ),
@@ -126,7 +130,7 @@ class MealPlanningScreen extends StatelessWidget {
         // Recipes List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             itemCount: recipes.length,
             itemBuilder: (context, index) {
               final recipe = recipes[index];
@@ -140,7 +144,7 @@ class MealPlanningScreen extends StatelessWidget {
 
   Widget _buildRecipeCard(BuildContext context, Recipe recipe) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -235,8 +239,32 @@ class MealPlanningScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.bookmark_border),
-                  onPressed: () {
-                    // TODO: Save recipe to favorites
+                  onPressed: () async {
+                    final repository = getIt<RecipeRepositoryImpl>();
+                    bool result = await repository.saveRecipe(recipe);
+                    if (context.mounted) {
+                      if (result) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Text(
+                              'Recipe saved to bookmarks!',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.amber,
+                            content: Text(
+                              'Failed to save recipe. Please try again.',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
               ],
@@ -274,8 +302,8 @@ class MealPlanningScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 context.read<MealPlanBloc>().add(
-                  GenerateMealPlan(ingredients: ingredients),
-                );
+                      GenerateMealPlan(ingredients: ingredients),
+                    );
               },
               child: const Text('Try Again'),
             ),

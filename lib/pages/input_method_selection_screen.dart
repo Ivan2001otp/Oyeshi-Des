@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_event.dart';
-import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_state.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
 import 'package:oyeshi_des/pages/ingredient_input_screen.dart';
 import 'package:oyeshi_des/pages/audio_input_screen.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 
@@ -38,7 +37,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
               const SizedBox(height: 32),
               _buildInputMethods(context),
               const SizedBox(height: 32),
-              _buildCurrentIngredients(context),
+              /*_buildCurrentIngredients(context),*/
             ],
           ),
         ),
@@ -181,6 +180,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
     );
   }
 
+/*
   Widget _buildCurrentIngredients(BuildContext context) {
     return BlocBuilder<IngredientInputBloc, IngredientInputState>(
       builder: (context, state) {
@@ -272,6 +272,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
       },
     );
   }
+*/
 
   void _navigateToAIreaderInputFromNotesTypeInput(BuildContext context) {
     Navigator.push(

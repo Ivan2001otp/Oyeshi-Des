@@ -23,6 +23,7 @@ class MealPlanBloc extends Bloc<MealPlanEvent, MealPlanState> {
 
   Future<void> _onGenerateMealPlan(
       GenerateMealPlan event, Emitter<MealPlanState> emit) async {
+        
     emit(MealPlanLoading(message: "Generating delicious meal plan..."));
 
     try {

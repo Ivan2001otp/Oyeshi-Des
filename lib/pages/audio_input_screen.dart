@@ -5,6 +5,7 @@ import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_state.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
+import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
 class AudioInputScreen extends StatefulWidget {
   const AudioInputScreen({super.key});
@@ -266,7 +267,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
               maxLines: 3,
             ),
           ),
-       
+
           if (partialResults.isNotEmpty) ...[
             const SizedBox(height: 8),
             const Text(
@@ -280,32 +281,32 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             const SizedBox(height: 4),
             // Constrain the word list with scrollable container
             Container(
-                constraints: BoxConstraints(maxHeight: 120, minHeight: 40),
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4,
-                    alignment: WrapAlignment.start,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: partialResults.map((result) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 1),
-                        child: Chip(
-                          backgroundColor: Colors.green.shade300,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
-                          label: Text(
-                            result,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 8),
-                          ),
+              constraints: BoxConstraints(maxHeight: 120, minHeight: 40),
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: partialResults.map((result) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 1),
+                      child: Chip(
+                        backgroundColor: Colors.green.shade300,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 2),
+                        label: Text(
+                          result,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 8),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),             
+                      ),
+                    );
+                  }).toList(),
                 ),
+              ),
+            ),
           ],
         ],
       ),
@@ -589,7 +590,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
               const Text('Parsed ingredients:'),
               const SizedBox(height: 8),
               ...ingredients.map((ingredient) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Row(
                       children: [
                         Icon(Icons.check_circle, color: Colors.green, size: 20),
@@ -618,6 +619,27 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             onPressed: () {
               Navigator.of(dialogContext).pop();
               Navigator.of(context).pop(ingredients);
+
+              // store in firebase.
+
+              final parsedIngredients = ingredients
+                  .map(
+                    (ingredient) => Ingredient(
+                        id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(ingredient)}',
+                        name: ingredient.name,
+                        category: 'AudioText',
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now()),
+                  )
+                  .toList();
+
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => MealPlanningScreen(
+                    ingredients: parsedIngredients,
+                  ),
+                ),
+              );
             },
             child: const Text('Use These Ingredients'),
           ),

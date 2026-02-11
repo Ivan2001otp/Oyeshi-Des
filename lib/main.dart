@@ -7,10 +7,11 @@ import 'package:oyeshi_des/bloc/text_scan/text_scan_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_state.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
+import 'package:oyeshi_des/repositories/recipe_repository.dart';
 import 'package:oyeshi_des/themes/app_theme.dart';
 import 'package:oyeshi_des/pages/input_method_selection_screen.dart';
 import 'package:oyeshi_des/widgets/no_glow_scroll_behaviour.dart';
-import 'package:oyeshi_des/config/dependency_injection.dart';
+import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
 
@@ -46,7 +47,12 @@ class OyeshiApp extends StatelessWidget {
         BlocProvider<ThemeBloc>(
           create: (_) => ThemeBloc(),
         ),
-        RepositoryProvider<AIService>(create: (_)=>getIt<AIService>(),),
+        RepositoryProvider<RecipeRepository>(
+          create: (_) => getIt<RecipeRepository>(),
+        ),
+        RepositoryProvider<AIService>(
+          create: (_) => getIt<AIService>(),
+        ),
         BlocProvider<TextScanBloc>(
           create: (_) => TextScanBloc(
             aiService: getIt<AIService>(),

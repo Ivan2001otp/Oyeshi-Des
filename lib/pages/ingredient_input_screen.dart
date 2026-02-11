@@ -4,6 +4,7 @@ import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_event.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_state.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
+import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
 class IngredientInputScreen extends StatefulWidget {
   const IngredientInputScreen({super.key});
@@ -28,27 +29,19 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Add Ingredients'),
+        title: const Text(''),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          /*IconButton(
-            icon: Icon(_isBulkMode ? Icons.check_box : Icons.list_alt),
-            onPressed: () {
-              setState(() {
-                _isBulkMode = !_isBulkMode;
-              });
-            },
-          ),*/
-          if (context.watch<IngredientInputBloc>().state
+          /*if (context.watch<IngredientInputBloc>().state
                   is IngredientInputLoaded &&
               (context.watch<IngredientInputBloc>().state
                       as IngredientInputLoaded)
                   .ingredients
                   .isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.restaurant_menu),
+              icon: const Icon(Icons.restaurant_menu, color: Colors.black,),
               onPressed: () => _showMealPlanDialog(context),
-            ),
+            ),*/
         ],
       ),
       body: BlocListener<IngredientInputBloc, IngredientInputState>(
@@ -79,129 +72,133 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
     );
   }
 
-
-void _addTextController(BuildContext context) {
-  if (_ingredientControllers.length >= 20) {
-    // Optional: Show a snackbar message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Max 20 ingredients allowed'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    return;
-  }
-  
-  setState(() {
-    _ingredientControllers.add(TextEditingController());
-  });
-}
-
-
-Widget _buildInputSection(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Text(
-        'Add an ingredient:',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      const SizedBox(height: 4),
-      
-      // Scrollable list with max height constraint
-      ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.4 ,
+  void _addTextController(BuildContext context) {
+    if (_ingredientControllers.length >= 20) {
+      // Optional: Show a snackbar message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Max 20 ingredients allowed'),
+          duration: Duration(seconds: 2),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ..._ingredientControllers.asMap().entries.map((entry) {
-                final index = entry.key;
-                final controller = entry.value;
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          keyboardType: TextInputType.name,
-                          minLines: 1,
-                          controller: controller,
-                          maxLength: 20,
-                          decoration: const InputDecoration(
-                            hintText: 'e.g. Eggs',
-                            icon: Icon(Icons.local_dining_outlined),
-                            border: OutlineInputBorder(),
-                            counterText: '',
+      );
+      return;
+    }
+
+    setState(() {
+      _ingredientControllers.add(TextEditingController());
+    });
+  }
+
+  Widget _buildInputSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Add an ingredient:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 4),
+
+        // Scrollable list with max height constraint
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.4,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ..._ingredientControllers.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final controller = entry.value;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            keyboardType: TextInputType.name,
+                            minLines: 1,
+                            controller: controller,
+                            maxLength: 20,
+                            decoration: const InputDecoration(
+                              hintText: 'e.g. Eggs',
+                              hintStyle: TextStyle(color: Color.fromARGB(255, 193, 190, 190)),
+                              icon: Icon(Icons.local_dining_outlined),
+                              border: OutlineInputBorder(),
+                              counterText: '',
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            controller.dispose();
-                            _ingredientControllers.removeAt(index);
-                          });
-                        },
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              controller.dispose();
+                              _ingredientControllers.removeAt(index);
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ],
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         ),
-      ),
-      
-      const SizedBox(height: 8),
-      
-      // Show counter and limit message
-      Text(
-        '${_ingredientControllers.length}/20 ingredients',
-        style: TextStyle(
-          fontSize: 12,
-          color: _ingredientControllers.length >= 20 ? Colors.red : Colors.grey,
+
+        const SizedBox(height: 8),
+
+        // Show counter and limit message
+        Text(
+          '${_ingredientControllers.length}/20 ingredients',
+          style: TextStyle(
+            fontSize: 12,
+            color:
+                _ingredientControllers.length >= 20 ? Colors.red : Colors.grey,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
-      ),
-      
-      const SizedBox(height: 8),
-      
-      ElevatedButton(
-        onPressed: _ingredientControllers.length >= 20 
-            ? null // Disable when limit reached
-            : () => _addTextController(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          disabledBackgroundColor: Colors.grey,
+
+        const SizedBox(height: 8),
+
+        ElevatedButton(
+          onPressed: _ingredientControllers.length >= 20
+              ? null // Disable when limit reached
+              : () => _addTextController(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurpleAccent,
+            disabledBackgroundColor: Colors.grey,
+          ),
+          child: const Text(
+            'Add Ingredient +',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
         ),
-        child: const Text(
-          'Add Ingredient +', 
-          style: TextStyle(color: Colors.white),
+
+        const SizedBox(height: 12),
+
+        TextButton.icon(
+          onPressed: _ingredientControllers.isEmpty
+              ? null // Disable if no ingredients
+              : () async {
+                  _submitIngredientList(context);
+                },
+          icon: const Icon(Icons.restaurant, color: Colors.white,),
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.deepPurpleAccent,
+          ),
+          label: const Text("Generate Meal Plans", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),),
         ),
-      ),
-      
-      const SizedBox(height: 12),
-      
-      TextButton.icon(
-        onPressed: _ingredientControllers.isEmpty 
-            ? null // Disable if no ingredients
-            : () async {
-                _submitIngredientList(context);
-              },
-        icon: const Icon(Icons.restaurant),
-        label: const Text("Generate Meal Plans"),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
+
 /*
   void _addTextController(BuildContext ctx) {
     setState(() {
@@ -217,6 +214,41 @@ Widget _buildInputSection(BuildContext context) {
     }
 
     context.read<IngredientInputBloc>().add(IngredientSubmitted(ingredients));
+
+    final parsedIngredients = ingredients
+        .map(
+          (name) => Ingredient(
+              id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(name)}',
+              name: name,
+              category: 'ManualText',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now()),
+        )
+        .toList();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => MealPlanningScreen(ingredients: parsedIngredients,)),
+    );
+    /*
+      Navigator.of(dialogContext).pop();
+
+              final parsedIngredients = ingredients
+                  .map((name) => Ingredient(
+                        id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(name)}',
+                        name: name,
+                        category: 'Scanned',
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      ))
+                  .toList();
+
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      MealPlanningScreen(ingredients: parsedIngredients),
+                ),
+              );
+     */
   }
 
   /*void _addSingleIngredient(BuildContext context, String text) {
@@ -234,7 +266,7 @@ Widget _buildInputSection(BuildContext context) {
     context.read<IngredientInputBloc>().add(ClearIngredients());
   }
 
-  void _showMealPlanDialog(BuildContext context) {
+  void _showMealPlanDialog(BuildContext context, List<String> foodIngredients) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -250,7 +282,7 @@ Widget _buildInputSection(BuildContext context) {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                _generateMealPlan(context);
+                _generateMealPlan(context, foodIngredients);
               },
               child: const Text('Generate'),
             ),
@@ -260,7 +292,7 @@ Widget _buildInputSection(BuildContext context) {
     );
   }
 
-  void _generateMealPlan(BuildContext context) {
+  void _generateMealPlan(BuildContext context, List<String> foodIngredients) {
     final bloc = context.read<IngredientInputBloc>();
     bloc.generateMealPlan(
       dietaryRestrictions: [],

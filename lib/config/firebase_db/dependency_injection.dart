@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oyeshi_des/config/analytics/google_analytics.dart';
 import 'package:oyeshi_des/firebase_options.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
@@ -10,6 +11,7 @@ import 'package:oyeshi_des/services/audio_input_service.dart';
 import 'package:oyeshi_des/config/firebase_db/firebase_config.dart';
 
 import '../../repositories/recipe_repository.dart';
+import '../onboarding/remote_config.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -26,13 +28,12 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerSingleton<RecipeRepositoryImpl>(
-  RecipeRepositoryImpl(),
-);
+    RecipeRepositoryImpl(),
+  );
 
   getIt.registerLazySingleton<AIService>(
     () => GeminiAIService(dotenv.get("GOOGLE_API_KEY")),
   );
-  
 
   getIt.registerLazySingleton<AudioInputService>(
     () => SpeechToTextService(),
@@ -47,6 +48,9 @@ Future<void> setupApp() async {
     name: "oyeshi-70387",
   );
 
+  await GoogleAnalyticsService().initialize();
+  await GoogleAnalyticsService().setAnalyticsCollectionEnabled(true);
+  await RemoteConfigService().initialize();
   await configureDependencies();
 }
 

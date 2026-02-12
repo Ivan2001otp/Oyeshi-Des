@@ -66,7 +66,7 @@ class RemoteConfigService {
       final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
       final config = OnboardingRemoteConfig.fromJson(jsonData);
 
-      return config.onboardingConfig.active ? config : null;
+      return config.onboarding_config.active ? config : null;
     } catch (error) {
       debugPrint('Error parsing onboarding config: $error');
       return null;

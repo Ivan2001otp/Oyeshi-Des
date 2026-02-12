@@ -1,22 +1,22 @@
 // onboarding_models.dart
 
 class OnboardingRemoteConfig {
-  final OnboardingPayloadConfig onboardingConfig;
+  final OnboardingPayloadConfig onboarding_config;
 
   OnboardingRemoteConfig({
-    required this.onboardingConfig,
+    required this.onboarding_config,
   });
 
   factory OnboardingRemoteConfig.fromJson(Map<String, dynamic> json) {
     return OnboardingRemoteConfig(
-      onboardingConfig: OnboardingPayloadConfig.fromJson(
+      onboarding_config: OnboardingPayloadConfig.fromJson(
           json['onboarding_config'] as Map<String, dynamic>),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'onboarding_config': onboardingConfig.toJson(),
+      'onboarding_config': onboarding_config.toJson(),
     };
   }
 }
@@ -36,9 +36,9 @@ class OnboardingPayloadConfig {
 
   factory OnboardingPayloadConfig.fromJson(Map<String, dynamic> json) {
     return OnboardingPayloadConfig(
-      version: json['version'] as String,
-      active: json['active'] as bool,
-      total: json['total'] as int,
+      version: json['version'] as String? ?? '',
+      active: json['active'] as bool? ?? false,
+      total: json['total'] as int? ?? 0,
       questions: (json['questions'] as List<dynamic>?)
               ?.map(
                   (q) => OnboardingQuestion.fromJson(q as Map<String, dynamic>))
@@ -89,16 +89,16 @@ class OnboardingQuestion {
 
   factory OnboardingQuestion.fromJson(Map<String, dynamic> json) {
     return OnboardingQuestion(
-      id: json['id'] as String,
-      type: json['type'] as String,
-      text: json['text'] as String,
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      text: json['text'] as String? ?? '',
       options: (json['options'] as List<dynamic>?)
               ?.map(
                   (opt) => QuestionOption.fromJson(opt as Map<String, dynamic>))
               .toList() ??
           const [],
-      nextStep: json['next_step'] as String,
-      buttonText: json['button_text'] as String,
+      nextStep: json['next_step'] as String? ?? '',
+      buttonText: json['button_text'] as String? ?? '',
     );
   }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:oyeshi_des/config/onboarding/onboarding_model.dart';
+import 'package:oyeshi_des/pages/pay_wall/hard_paywall.dart';
+
+import '../../config/analytics/google_analytics.dart';
 
 class OnboardingQuestionScreen extends StatefulWidget {
   final OnboardingPayloadConfig config;
   final int currentIndex;
-  
+
   const OnboardingQuestionScreen({
     super.key,
     required this.config,
@@ -12,7 +15,8 @@ class OnboardingQuestionScreen extends StatefulWidget {
   });
 
   @override
-  State<OnboardingQuestionScreen> createState() => _OnboardingQuestionScreenState();
+  State<OnboardingQuestionScreen> createState() =>
+      _OnboardingQuestionScreenState();
 }
 
 class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
@@ -27,7 +31,8 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
     });
   }
 
-  OnboardingQuestion get _currentQuestion => widget.config.questions[widget.currentIndex];
+  OnboardingQuestion get _currentQuestion =>
+      widget.config.questions[widget.currentIndex];
   bool get _isFirstQuestion => widget.currentIndex == 0;
   bool get _isLastQuestion => widget.currentIndex == widget.config.total - 1;
   bool get _isFinalCTA => _currentQuestion.type == 'final_cta';
@@ -42,14 +47,36 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
     Navigator.pop(context);
   }
 
-  void _handleContinue() {
+  void _handleContinue() async {
     if (_isLastQuestion) {
-      // Navigate to paywall
-      debugPrint('🎯 Navigate to paywall');
-      // Navigator.pushNamed(context, '/paywall');
+     
+      Map<String, Object> parameters = {
+        'verdict': "onboarding_completed_successfully",
+      };
+
+      await analyticsService.logCustomEvent(
+          name: "onboarding_completed", parameters: parameters);
+
+      if (mounted) {
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PaywallScreen()),
+        );
+      }
     } else {
       // Navigate to next question
-      Navigator.push(
+      String option = _currentQuestion.options
+          .where((opt) => opt.id == _selectedOptionId)
+          .first
+          .text;
+      Map<String, Object> parameters = {
+        'question_id': _currentQuestion.text,
+        'answer_id': option,
+      };
+
+      await analyticsService.logCustomEvent(
+          name: "onboarding_inprogress", parameters: parameters);
+
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => OnboardingQuestionScreen(
@@ -113,9 +140,9 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                           )
                         else
                           const SizedBox(width: 40),
-                        
+
                         const Spacer(),
-                        
+
                         // Elegant Step Indicator
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -133,7 +160,8 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                             ),
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(
-                              color: const Color(0xFF22C55E).withValues(alpha: 0.2),
+                              color: const Color(0xFF22C55E)
+                                  .withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -165,7 +193,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Refined Progress Bar
                     Stack(
                       children: [
@@ -197,7 +225,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                   ],
                 ),
               ),
-              
+
               // Main Content
               Expanded(
                 child: SingleChildScrollView(
@@ -227,7 +255,8 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E).withValues(alpha: 0.08),
+                                color: const Color(0xFF22C55E)
+                                    .withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
@@ -239,7 +268,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                           ],
                         ),
                         const SizedBox(height: 40),
-                        
+
                         // Options or CTA
                         if (_isFinalCTA)
                           _buildFinalCTA()
@@ -255,13 +284,16 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                               );
                             },
                             child: Column(
-                              children: _currentQuestion.options.map(
-                                (option) => _buildLuxuryOptionCard(
-                                  option: option,
-                                  isSelected: _selectedOptionId == option.id,
-                                  onTap: () => _onOptionSelected(option.id),
-                                ),
-                              ).toList(),
+                              children: _currentQuestion.options
+                                  .map(
+                                    (option) => _buildLuxuryOptionCard(
+                                      option: option,
+                                      isSelected:
+                                          _selectedOptionId == option.id,
+                                      onTap: () => _onOptionSelected(option.id),
+                                    ),
+                                  )
+                                  .toList(),
                             ),
                           ),
                       ],
@@ -269,7 +301,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                   ),
                 ),
               ),
-              
+
               // Bottom Section with Next/CTA Button
               if (_isFinalCTA || _selectedOptionId != null)
                 Container(
@@ -295,14 +327,22 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
 
   IconData _getQuestionIcon() {
     switch (widget.currentIndex) {
-      case 0: return Icons.shopping_cart_rounded;
-      case 1: return Icons.delete_outline_rounded;
-      case 2: return Icons.attach_money_rounded;
-      case 3: return Icons.balance_rounded;
-      case 4: return Icons.timer_rounded;
-      case 5: return Icons.person_outline_rounded;
-      case 6: return Icons.celebration_rounded;
-      default: return Icons.restaurant_menu_rounded;
+      case 0:
+        return Icons.shopping_cart_rounded;
+      case 1:
+        return Icons.delete_outline_rounded;
+      case 2:
+        return Icons.attach_money_rounded;
+      case 3:
+        return Icons.balance_rounded;
+      case 4:
+        return Icons.timer_rounded;
+      case 5:
+        return Icons.person_outline_rounded;
+      case 6:
+        return Icons.celebration_rounded;
+      default:
+        return Icons.restaurant_menu_rounded;
     }
   }
 
@@ -350,9 +390,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                     ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected
-                    ? Colors.transparent
-                    : Colors.grey[200]!,
+                color: isSelected ? Colors.transparent : Colors.grey[200]!,
                 width: 1.5,
               ),
               boxShadow: [
@@ -374,13 +412,9 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                   height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.transparent,
+                    color: isSelected ? Colors.white : Colors.transparent,
                     border: Border.all(
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.grey[400]!,
+                      color: isSelected ? Colors.white : Colors.grey[400]!,
                       width: isSelected ? 2 : 1.5,
                     ),
                   ),
@@ -401,12 +435,10 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                     option.text,
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: isSelected 
-                          ? FontWeight.w600 
-                          : FontWeight.w500,
-                      color: isSelected 
-                          ? Colors.white
-                          : const Color(0xFF1E293B),
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color:
+                          isSelected ? Colors.white : const Color(0xFF1E293B),
                       height: 1.4,
                     ),
                   ),
@@ -466,7 +498,9 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                _isLastQuestion ? Icons.check_rounded : Icons.arrow_forward_rounded,
+                _isLastQuestion
+                    ? Icons.check_rounded
+                    : Icons.arrow_forward_rounded,
                 size: 18,
                 color: Colors.white,
               ),
@@ -478,102 +512,102 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
   }
 
   Widget _buildFinalCTA() {
-  return Column(
-    children: [
-      // Hero illustration
-      Container(
-        width: 120,
-        height: 120,
-        margin: const EdgeInsets.only(bottom: 24),
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            colors: [
-              const Color(0xFF22C55E).withValues(alpha: 0.2),
-              const Color(0xFF22C55E).withValues(alpha: 0.05),
-            ],
-          ),
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF22C55E).withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                ),
+    return Column(
+      children: [
+        // Hero illustration
+        Container(
+          width: 120,
+          height: 120,
+          margin: const EdgeInsets.only(bottom: 24),
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              colors: [
+                const Color(0xFF22C55E).withValues(alpha: 0.2),
+                const Color(0xFF22C55E).withValues(alpha: 0.05),
               ],
             ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              size: 48,
-              color: Color(0xFF22C55E),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF22C55E).withValues(alpha: 0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 48,
+                color: Color(0xFF22C55E),
+              ),
             ),
           ),
         ),
-      ),
-      
-      // Summary text
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF22C55E).withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF22C55E).withValues(alpha: 0.1),
-            width: 1,
+
+        // Summary text
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF22C55E).withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: const Color(0xFF22C55E).withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.celebration_rounded,
+                color: Color(0xFF22C55E),
+                size: 32,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'You\'ve answered ${widget.config.total} questions',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your personalized meal plan is ready',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.celebration_rounded,
-              color: Color(0xFF22C55E),
-              size: 32,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'You\'ve answered ${widget.config.total} questions',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Your personalized meal plan is ready',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+
+        const SizedBox(height: 40),
+
+        // CTA Message
+        Text(
+          _currentQuestion.text,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            height: 1.4,
+            color: Color(0xFF0F172A),
+          ),
+          textAlign: TextAlign.center,
         ),
-      ),
-      
-      const SizedBox(height: 40),
-      
-      // CTA Message
-      Text(
-        _currentQuestion.text,
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          height: 1.4,
-          color: Color(0xFF0F172A),
-        ),
-        textAlign: TextAlign.center,
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildCTAButton() {
     return SizedBox(

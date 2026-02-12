@@ -383,7 +383,14 @@ class WelcomeOnboardingScreen extends StatelessWidget {
 
     // Navigate to onboarding
     if (config != null && config.onboarding_config.active) {
-      await analyticsService.logScreenView(screenName: "Welcome screen");
+
+      Map<String, Object> parameters = {
+        'onboarding_step': 'start',
+      };
+
+      await analyticsService.logCustomEvent(
+          name: "onboarding_started", parameters: parameters);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

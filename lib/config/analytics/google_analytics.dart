@@ -198,11 +198,11 @@ class GoogleAnalyticsService {
 
   Future<void> logCustomEvent({
     required String name,
-    Map<String, dynamic>? parameters,
+    Map<String, Object>? parameters,
   }) async {
     await _analytics.logEvent(
       name: name,
-      parameters: parameters as Map<String, Object>?,
+      parameters: parameters ,
     );
   }
 

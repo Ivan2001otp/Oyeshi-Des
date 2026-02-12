@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oyeshi_des/config/analytics/google_analytics.dart';
 import 'package:oyeshi_des/firebase_options.dart';
 import 'package:oyeshi_des/repositories/ingredient_repository.dart';
 import 'package:oyeshi_des/services/ai_service.dart';
@@ -46,7 +47,9 @@ Future<void> setupApp() async {
     options: DefaultFirebaseOptions.currentPlatform,
     name: "oyeshi-70387",
   );
-  
+
+  await GoogleAnalyticsService().initialize();
+  await GoogleAnalyticsService().setAnalyticsCollectionEnabled(true);
   await RemoteConfigService().initialize();
   await configureDependencies();
 }

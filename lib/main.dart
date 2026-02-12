@@ -7,7 +7,7 @@ import 'package:oyeshi_des/bloc/text_scan/text_scan_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_bloc.dart';
 import 'package:oyeshi_des/bloc/theme/theme_state.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
-import 'package:oyeshi_des/pages/onboarding/first_onboarding_screen.dart';
+import 'package:oyeshi_des/config/analytics/google_analytics.dart';
 import 'package:oyeshi_des/pages/onboarding/welcome_onboarding_screen.dart';
 import 'package:oyeshi_des/repositories/recipe_repository.dart';
 import 'package:oyeshi_des/themes/app_theme.dart';
@@ -84,6 +84,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: themeState.isDarkMode ? AppTheme.dark : AppTheme.light,
         home: const WelcomeOnboardingScreen(), // change it to InputMethodSelectionScreen() after onboarding is done.
+        navigatorObservers: [GoogleAnalyticsService().observer],
         builder: (context, child) {
           return ScrollConfiguration(
             behavior: const NoGlowScrollBehaviour(),

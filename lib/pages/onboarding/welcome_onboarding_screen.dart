@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oyeshi_des/config/analytics/google_analytics.dart';
 import 'package:oyeshi_des/pages/onboarding/onboarding_question_screen.dart';
 
 import '../../config/onboarding/remote_config.dart';
@@ -28,7 +29,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -38,7 +39,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
-                      
+
                       // Animated leaf icon
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -52,8 +53,10 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 gradient: RadialGradient(
                                   colors: [
-                                    const Color(0xFF22C55E).withValues(alpha: 0.2),
-                                    const Color(0xFF22C55E).withValues(alpha: 0.05),
+                                    const Color(0xFF22C55E)
+                                        .withValues(alpha: 0.2),
+                                    const Color(0xFF22C55E)
+                                        .withValues(alpha: 0.05),
                                   ],
                                 ),
                                 shape: BoxShape.circle,
@@ -65,7 +68,8 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF22C55E).withValues(alpha: 0.15),
+                                      color: const Color(0xFF22C55E)
+                                          .withValues(alpha: 0.15),
                                       blurRadius: 30,
                                       offset: const Offset(0, 10),
                                     ),
@@ -81,9 +85,9 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 48),
-                      
+
                       // Welcome title
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -118,9 +122,9 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Tagline
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -135,7 +139,8 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E).withValues(alpha: 0.08),
+                                color: const Color(0xFF22C55E)
+                                    .withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: const Text(
@@ -151,9 +156,9 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 48),
-                      
+
                       // Stats cards
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -188,9 +193,9 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 60),
-                      
+
                       // Message card
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -243,14 +248,14 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 48),
                     ],
                   ),
                 ),
               ),
             ),
-            
+
             // Bottom button
             Container(
               padding: const EdgeInsets.all(24),
@@ -370,14 +375,15 @@ class WelcomeOnboardingScreen extends StatelessWidget {
     // Load config
     final remoteConfigService = RemoteConfigService();
     final config = await remoteConfigService.getOnboardingConfig();
-    
+
     if (!context.mounted) return;
-    
+
     // Pop loading dialog
     Navigator.pop(context);
 
     // Navigate to onboarding
     if (config != null && config.onboarding_config.active) {
+      await analyticsService.logScreenView(screenName: "Welcome screen");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

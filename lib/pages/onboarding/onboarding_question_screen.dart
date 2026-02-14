@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:oyeshi_des/config/onboarding/onboarding_model.dart';
 import 'package:oyeshi_des/pages/pay_wall/hard_paywall.dart';
 
 import '../../config/analytics/google_analytics.dart';
+import '../../constants/fonts.dart';
 
 class OnboardingQuestionScreen extends StatefulWidget {
   final OnboardingPayloadConfig config;
@@ -34,7 +36,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
   OnboardingQuestion get _currentQuestion =>
       widget.config.questions[widget.currentIndex];
   bool get _isFirstQuestion => widget.currentIndex == 0;
-  bool get _isLastQuestion => widget.currentIndex == widget.config.total - 1;
+  bool get _isLastQuestion => widget.currentIndex == widget.config.total-1;
   bool get _isFinalCTA => _currentQuestion.type == 'final_cta';
 
   void _onOptionSelected(String optionId) {
@@ -49,7 +51,6 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
 
   void _handleContinue() async {
     if (_isLastQuestion) {
-     
       Map<String, Object> parameters = {
         'verdict': "onboarding_completed_successfully",
       };
@@ -145,8 +146,9 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
 
                         // Elegant Step Indicator
                         Container(
+                          margin: EdgeInsets.only(left: 18),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 18,
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
@@ -167,6 +169,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
                                 width: 6,
@@ -178,11 +181,12 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'STEP ${widget.currentIndex + 1}/${widget.config.total}',
+                                'STEP ${widget.currentIndex + 1} of ${widget.config.total}',
                                 style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 1.2,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  // letterSpacing: 1.2,
+                                  fontFamily: FontConstants.fontFamily,
                                   color: Color(0xFF22C55E),
                                 ),
                               ),
@@ -236,38 +240,46 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Question with Dynamic Icon
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: Text(
-                                _currentQuestion.text,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.3,
-                                  color: Color(0xFF0F172A),
-                                  letterSpacing: -0.5,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _currentQuestion.text,
+                                    style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.3,
+                                        fontFamily: FontConstants.fontFamily,
+                                        color: Color(0xFF0F172A),
+                                        letterSpacing: -0.5,
+                                        wordSpacing: 4),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                             const SizedBox(width: 16),
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.zero,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E)
-                                    .withValues(alpha: 0.08),
+                                color: Colors.transparent,
+                                // color: const Color(0xFF22C55E)
+                                //     .withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: Icon(
+                              child: Image.asset(
                                 _getQuestionIcon(),
-                                color: const Color(0xFF22C55E),
-                                size: 28,
+                                width: 340,
+                                height: 340,
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 8),
 
                         // Options or CTA
                         if (_isFinalCTA)
@@ -325,24 +337,28 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
     );
   }
 
-  IconData _getQuestionIcon() {
+  String _getQuestionIcon() {
     switch (widget.currentIndex) {
       case 0:
-        return Icons.shopping_cart_rounded;
+        return "assets/images/icons/q1_image.png";
       case 1:
-        return Icons.delete_outline_rounded;
+        return "assets/images/icons/q2_image.png";
       case 2:
-        return Icons.attach_money_rounded;
+        return "assets/images/icons/q3_image.png";
       case 3:
-        return Icons.balance_rounded;
+        return "assets/images/icons/q4_image.png";
       case 4:
-        return Icons.timer_rounded;
+        return "assets/images/icons/q5_image.png";
       case 5:
-        return Icons.person_outline_rounded;
+        return "assets/images/icons/q6_image.png";
       case 6:
-        return Icons.celebration_rounded;
+        return "assets/images/icons/q7_image.png";
+      case 7:
+        return "assets/images/icons/q8_image.png";
+      case 8:
+        return "assets/images/icons/q8_image.png";
       default:
-        return Icons.restaurant_menu_rounded;
+        return "assets/images/icons/q8_image.png";
     }
   }
 
@@ -366,10 +382,10 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
         child: GestureDetector(
           onTap: onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 350),
             curve: Curves.easeOut,
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: isSelected
                   ? LinearGradient(
@@ -434,9 +450,10 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                   child: Text(
                     option.text,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
+                      fontFamily: FontConstants.fontFamily,
                       fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                          isSelected ? FontWeight.w800 : FontWeight.w600,
                       color:
                           isSelected ? Colors.white : const Color(0xFF1E293B),
                       height: 1.4,
@@ -452,7 +469,7 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.arrow_forward_rounded,
+                      Icons.emoji_food_beverage_rounded,
                       size: 14,
                       color: Colors.white,
                     ),
@@ -486,8 +503,8 @@ class _OnboardingQuestionScreenState extends State<OnboardingQuestionScreen> {
               _isLastQuestion ? 'Finish' : 'Continue',
               style: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+                fontFamily: FontConstants.fontFamily,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(width: 12),

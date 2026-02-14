@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_event.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_state.dart';
+import 'package:oyeshi_des/constants/fonts.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
@@ -29,20 +30,14 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text(''),
+        title: const Text(
+          'Let\'s get u cooked',
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              fontFamily: FontConstants.fontFamily),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          /*if (context.watch<IngredientInputBloc>().state
-                  is IngredientInputLoaded &&
-              (context.watch<IngredientInputBloc>().state
-                      as IngredientInputLoaded)
-                  .ingredients
-                  .isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.restaurant_menu, color: Colors.black,),
-              onPressed: () => _showMealPlanDialog(context),
-            ),*/
-        ],
       ),
       body: BlocListener<IngredientInputBloc, IngredientInputState>(
         listener: (context, state) {
@@ -94,8 +89,11 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Text(
-          'Add an ingredient:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          'Add your food ingredients',
+          style: TextStyle(
+              fontFamily: FontConstants.fontFamily,
+              fontSize: 16,
+              fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
 
@@ -123,7 +121,8 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
                             maxLength: 20,
                             decoration: const InputDecoration(
                               hintText: 'e.g. Eggs',
-                              hintStyle: TextStyle(color: Color.fromARGB(255, 193, 190, 190)),
+                              hintStyle: TextStyle(
+                                  color: Color.fromARGB(255, 193, 190, 190)),
                               icon: Icon(Icons.local_dining_outlined),
                               border: OutlineInputBorder(),
                               counterText: '',
@@ -159,6 +158,7 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
           '${_ingredientControllers.length}/20 ingredients',
           style: TextStyle(
             fontSize: 12,
+            fontFamily: FontConstants.fontFamily,
             color:
                 _ingredientControllers.length >= 20 ? Colors.red : Colors.grey,
           ),
@@ -177,7 +177,10 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
           ),
           child: const Text(
             'Add Ingredient +',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontFamily: FontConstants.fontFamily,
+                color: Colors.white,
+                fontWeight: FontWeight.w600),
           ),
         ),
 
@@ -189,23 +192,25 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
               : () async {
                   _submitIngredientList(context);
                 },
-          icon: const Icon(Icons.restaurant, color: Colors.white,),
+          icon: const Icon(
+            Icons.restaurant,
+            color: Colors.white,
+          ),
           style: TextButton.styleFrom(
             backgroundColor: Colors.deepPurpleAccent,
           ),
-          label: const Text("Generate Meal Plans", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),),
+          label: const Text(
+            "Generate Meal Plans",
+            style: TextStyle(
+                color: Colors.white,
+                fontFamily: FontConstants.fontFamily,
+                fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );
   }
 
-/*
-  void _addTextController(BuildContext ctx) {
-    setState(() {
-      _ingredientControllers.add(TextEditingController());
-    });
-  }
-*/
   void _submitIngredientList(BuildContext ctx) {
     List<String> ingredients = [];
 
@@ -227,40 +232,12 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
         .toList();
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => MealPlanningScreen(ingredients: parsedIngredients,)),
+      MaterialPageRoute(
+          builder: (context) => MealPlanningScreen(
+                ingredients: parsedIngredients,
+              )),
     );
-    /*
-      Navigator.of(dialogContext).pop();
-
-              final parsedIngredients = ingredients
-                  .map((name) => Ingredient(
-                        id: 'scan_${DateTime.now().millisecondsSinceEpoch}_${ingredients.indexOf(name)}',
-                        name: name,
-                        category: 'Scanned',
-                        createdAt: DateTime.now(),
-                        updatedAt: DateTime.now(),
-                      ))
-                  .toList();
-
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      MealPlanningScreen(ingredients: parsedIngredients),
-                ),
-              );
-     */
   }
-
-  /*void _addSingleIngredient(BuildContext context, String text) {
-    if (text.trim().isEmpty) return;
-
-    context.read<IngredientInputBloc>().add(IngredientSubmitted(text.trim()));
-    _textController.clear();
-  }*/
-
-  /*void _removeIngredient(BuildContext context, String ingredientId) {
-    context.read<IngredientInputBloc>().add(RemoveIngredient(ingredientId));
-  }*/
 
   void _clearAllIngredients(BuildContext context) {
     context.read<IngredientInputBloc>().add(ClearIngredients());
@@ -355,7 +332,12 @@ class MealPlanResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Generated Meal Plan'),
+        title: const Text(
+          'Generated Meal Plan',
+          style: TextStyle(
+            fontFamily: FontConstants.fontFamily,
+          ),
+        ),
       ),
       body: ListView.builder(
         itemCount: recipes.length,
@@ -371,27 +353,62 @@ class MealPlanResultsScreen extends StatelessWidget {
                   Text(
                     recipe.name,
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                        fontFamily: FontConstants.fontFamily,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Text(recipe.description),
+                  Text(
+                    recipe.description,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text('Meal Type: ${recipe.mealType}'),
-                  Text('Prep Time: ${recipe.prepTimeMinutes} min'),
-                  Text('Cook Time: ${recipe.cookTimeMinutes} min'),
-                  Text('Servings: ${recipe.servings}'),
+                  Text(
+                    'Meal Type: ${recipe.mealType}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontFamily: FontConstants.fontFamily,
+                    ),
+                  ),
+                  Text('Prep Time: ${recipe.prepTimeMinutes} min',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontFamily: FontConstants.fontFamily,
+                      )),
+                  Text('Cook Time: ${recipe.cookTimeMinutes} min',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontFamily: FontConstants.fontFamily,
+                      )),
+                  Text('Servings: ${recipe.servings}',
+                      style: TextStyle(
+                        fontFamily: FontConstants.fontFamily,
+                      )),
                   const SizedBox(height: 8),
-                  const Text('Ingredients:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Ingredients:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: FontConstants.fontFamily),
+                  ),
                   ...recipe.ingredients
                       .map((ingredient) => Text('• $ingredient')),
                   const SizedBox(height: 8),
-                  const Text('Instructions:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...recipe.instructions
-                      .asMap()
-                      .entries
-                      .map((entry) => Text('${entry.key + 1}. ${entry.value}')),
+                  const Text(
+                    'Instructions:',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: FontConstants.fontFamily),
+                  ),
+                  ...recipe.instructions.asMap().entries.map(
+                        (entry) => Text(
+                          '${entry.key + 1}. ${entry.value}',
+                          style:
+                              TextStyle(fontFamily: FontConstants.fontFamily),
+                        ),
+                      ),
                 ],
               ),
             ),

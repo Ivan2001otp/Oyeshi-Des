@@ -77,11 +77,7 @@ class _PaywallScreenState extends State<PaywallScreen>
                 : const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white,
-                      Color(0xFFF0FDF4),
-                      Color.fromARGB(255, 214, 245, 214),
-                    ],
+                    colors: [Colors.white, Colors.white30],
                   ),
           ),
           child: SafeArea(
@@ -123,13 +119,11 @@ class _PaywallScreenState extends State<PaywallScreen>
                     Positioned(
                       left: 1,
                       right: 1,
-                      child: Icon(
-                        Icons.food_bank_outlined,
-                        size: 120,
-                        color: isDark
-                            ? const Color(0xFF22C55E).withValues(alpha: 0.4)
-                            : const Color.fromARGB(255, 18, 163, 71)
-                                .withValues(alpha: 0.5),
+                      child: Image.asset(
+                        "assets/app_logo/playstore.png",
+                        height: 128,
+                        width: 128,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],
@@ -161,7 +155,8 @@ class _PaywallScreenState extends State<PaywallScreen>
                         title: "2 Month Plan"),
                   ],
                 ),
-                PaywallUtilityWidgets.buildCTAButton(isDark, _selectedPlan),
+                PaywallUtilityWidgets.buildCTAButton(
+                    isDark, _selectedPlan, context),
                 PaywallUtilityWidgets.buildTermsLinks(isDark)
               ],
             ),
@@ -170,7 +165,6 @@ class _PaywallScreenState extends State<PaywallScreen>
       ),
     );
   }
-
 
   Widget _buildPlanCard({
     required bool isDark,
@@ -442,5 +436,4 @@ class _PaywallScreenState extends State<PaywallScreen>
       },
     );
   }
-
 }

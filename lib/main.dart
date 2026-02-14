@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
         title: "Oyeshi Des App",
         debugShowCheckedModeBanner: false,
         theme: themeState.isDarkMode ? AppTheme.dark : AppTheme.light,
-        home: const PaywallScreen(), // change it to InputMethodSelectionScreen() after onboarding is done.
+        home: const WelcomeOnboardingScreen(), // change it to InputMethodSelectionScreen() after onboarding is done.
         navigatorObservers: [GoogleAnalyticsService().observer],
         builder: (context, child) {
           return ScrollConfiguration(

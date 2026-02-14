@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_bloc.dart';
 import 'package:oyeshi_des/bloc/ingredient_input/ingredient_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
+import 'package:oyeshi_des/constants/fonts.dart';
 import 'package:oyeshi_des/pages/ingredient_input_screen.dart';
 import 'package:oyeshi_des/pages/audio_input_screen.dart';
 import 'package:oyeshi_des/config/firebase_db/dependency_injection.dart';
@@ -21,24 +22,28 @@ class InputMethodSelectionScreen extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
-          'Oyeshi Des',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          'Oyishi Des',
+          style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: -0.2, fontFamily: FontConstants.fontFamily),
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 32),
-              _buildInputMethods(context),
-              const SizedBox(height: 32),
-              /*_buildCurrentIngredients(context),*/
-            ],
+          child: SingleChildScrollView(
+            physics: NeverScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 16,
+              children: [
+                _buildHeader(),
+                // const SizedBox(height: 32),
+                _buildInputMethods(context),
+                // const SizedBox(height: 32),
+                /*_buildCurrentIngredients(context),*/
+              ],
+            ),
           ),
         ),
       ),
@@ -48,16 +53,21 @@ class InputMethodSelectionScreen extends StatelessWidget {
   Widget _buildHeader() {
     return Column(
       children: [
-        const Icon(
-          Icons.restaurant_menu,
-          size: 80,
-          color: Colors.blue,
+        SizedBox(
+          height: 16,
+        ),
+        Image.asset(
+          "assets/app_logo/playstore.png",
+          width: 120,
+          height: 120,
+          fit: BoxFit.contain,
         ),
         const SizedBox(height: 16),
         const Text(
-          'Choose Input Method',
+          'Choose your style',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 24,
+            fontFamily: FontConstants.fontFamily,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -67,6 +77,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
           'Select how you want to add your ingredients',
           style: TextStyle(
             fontSize: 16,
+            fontFamily: FontConstants.fontFamily,
             color: Colors.grey[600],
           ),
           textAlign: TextAlign.center,
@@ -137,7 +148,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -155,6 +166,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
                       title,
                       style: const TextStyle(
                         fontSize: 18,
+                        fontFamily: FontConstants.fontFamily,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -163,6 +175,7 @@ class InputMethodSelectionScreen extends StatelessWidget {
                       description,
                       style: TextStyle(
                         fontSize: 14,
+                        fontFamily: FontConstants.fontFamily,
                         color: Colors.grey[600],
                       ),
                     ),

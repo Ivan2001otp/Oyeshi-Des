@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_bloc.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_event.dart';
 import 'package:oyeshi_des/bloc/audio_input/audio_input_state.dart';
+import 'package:oyeshi_des/constants/fonts.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
@@ -53,10 +54,6 @@ class _AudioInputScreenState extends State<AudioInputScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        /*title: const Text(
-          'Oyeshi Des',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),*/
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,
       ),
@@ -99,24 +96,28 @@ class _AudioInputScreenState extends State<AudioInputScreen>
 
   Widget _buildTopSection(AudioInputState state) {
     return Column(
+      spacing: 14,
       children: [
         const Text(
           'Voice Input',
           style: TextStyle(
             fontSize: 16,
+            fontFamily: FontConstants.fontFamily,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4),
         Text(
           _getSubtitle(state),
           style: TextStyle(
             fontSize: 16,
+            fontFamily: FontConstants.fontFamily,
             color: Colors.grey[600],
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4),
+        SizedBox(
+          height: 0,
+        )
       ],
     );
   }
@@ -128,7 +129,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Initializing speech recognition...'),
+            Text(
+              'Initializing speech recognition...',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
           ],
         ),
       );
@@ -151,10 +155,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             Text(
               _formatDuration(_recordingDuration),
               style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                  fontFamily: FontConstants.fontFamily),
             ),
           ],
           const SizedBox(height: 32),
@@ -174,8 +178,6 @@ class _AudioInputScreenState extends State<AudioInputScreen>
       children: [
         if (state is! AudioInputPermissionDenied && state is! AudioInputError)
           _buildControlButtons(state),
-        // const SizedBox(height: 6),
-        // _buildHelpText(),
       ],
     );
   }
@@ -192,8 +194,8 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isListening
-                ? Colors.red.withOpacity(0.1)
-                : Colors.blue.withOpacity(0.1),
+                ? Colors.red.withValues(alpha: 0.1)
+                : Colors.blue.withValues(alpha: 0.1),
             border: Border.all(
               color: isListening ? Colors.red : Colors.blue,
               width: 3,
@@ -246,9 +248,9 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           const Text(
             'Current Recognition:',
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                fontFamily: FontConstants.fontFamily),
           ),
           const SizedBox(height: 8),
           // Constrain current text area
@@ -259,10 +261,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             child: Text(
               text.isEmpty ? 'Start speaking...' : text,
               style: TextStyle(
-                fontSize: 16,
-                color: text.isEmpty ? Colors.grey : Colors.black,
-                height: 1.5,
-              ),
+                  fontSize: 16,
+                  color: text.isEmpty ? Colors.grey : Colors.black,
+                  height: 1.5,
+                  fontFamily: FontConstants.fontFamily),
               overflow: TextOverflow.ellipsis,
               maxLines: 3,
             ),
@@ -273,10 +275,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
             const Text(
               'Individual Words:',
               style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontFamily: FontConstants.fontFamily),
             ),
             const SizedBox(height: 4),
             // Constrain the word list with scrollable container
@@ -299,7 +301,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
                           result,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 8),
+                          style: const TextStyle(
+                            fontSize: 8,
+                            fontFamily: FontConstants.fontFamily,
+                          ),
                         ),
                       ),
                     );
@@ -326,7 +331,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ElevatedButton.icon(
             onPressed: () => _startListening(),
             icon: const Icon(Icons.mic),
-            label: const Text('Start Recording'),
+            label: const Text(
+              'Start Recording',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
@@ -337,7 +345,10 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ElevatedButton.icon(
             onPressed: () => _confirmStopRecording(),
             icon: const Icon(Icons.stop),
-            label: const Text('Stop Recording'),
+            label: const Text(
+              'Stop Recording',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
@@ -348,7 +359,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ElevatedButton.icon(
             onPressed: () => _processText(state.recognizedText),
             icon: const Icon(Icons.check),
-            label: const Text('Process Text'),
+            label: const Text('Process Text', style: TextStyle(fontFamily: FontConstants.fontFamily),),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -359,7 +370,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ElevatedButton.icon(
             onPressed: () => _resetRecording(),
             icon: const Icon(Icons.refresh),
-            label: const Text('New Recording'),
+            label: const Text('New Recording',style: TextStyle(fontFamily: FontConstants.fontFamily),),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
@@ -370,7 +381,7 @@ class _AudioInputScreenState extends State<AudioInputScreen>
           ElevatedButton.icon(
             onPressed: () => _retry(),
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: const Text('Retry',style: TextStyle(fontFamily: FontConstants.fontFamily),),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
@@ -443,40 +454,6 @@ class _AudioInputScreenState extends State<AudioInputScreen>
     );
   }
 
-  Widget _buildHelpText() {
-    return Column(
-      children: [
-        Text(
-          '🎤 Troubleshooting:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[700],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '• Speak clearly and close to device\n• Minimize background noise\n• Ensure internet connection\n• Grant microphone permissions',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-          textAlign: TextAlign.start,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '💡 Each word appears individually in the list below',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[500],
-            fontStyle: FontStyle.italic,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
 
   String _getSubtitle(AudioInputState state) {
     if (state is AudioInputInitial) {

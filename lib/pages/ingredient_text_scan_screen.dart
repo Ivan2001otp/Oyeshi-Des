@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
+import 'package:oyeshi_des/constants/fonts.dart';
 import 'package:oyeshi_des/models/ingredient.dart';
 import 'package:oyeshi_des/pages/meal_planning_screen.dart';
 
@@ -41,12 +42,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
     return BlocProvider(
       create: (context) => _textScanBloc!,
       child: Scaffold(
-        /*appBar: AppBar(
-          title: const Text('Scan Handwritten List',style: TextStyle(fontSize: 12),),
-
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          elevation: 0,
-        ),*/
+     
         body: BlocConsumer<TextScanBloc, TextScanState>(
           listener: (context, state) {
             _handleStateChanges(context, state);
@@ -105,7 +101,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
           const SizedBox(height: 20),
           Text(
             message,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style: const TextStyle(fontSize: 16, color: Colors.grey, fontFamily: FontConstants.fontFamily),
           ),
         ],
       ),
@@ -127,14 +123,20 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             const SizedBox(height: 20),
             const Text(
               'Camera Permission Required',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontConstants.fontFamily),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             const Text(
               'Please grant camera permission to scan handwritten ingredient lists',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontFamily: FontConstants.fontFamily),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
@@ -147,12 +149,18 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
               ),
-              child: const Text('Grant Permission'),
+              child: const Text(
+                'Grant Permission',
+                style: TextStyle(fontFamily: FontConstants.fontFamily),
+              ),
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back'),
+              child: const Text(
+                'Go Back',
+                style: TextStyle(fontFamily: FontConstants.fontFamily),
+              ),
             ),
           ],
         ),
@@ -176,13 +184,19 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             const SizedBox(height: 20),
             const Text(
               'Something went wrong',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: FontConstants.fontFamily),
             ),
             const SizedBox(height: 12),
             Text(
               error,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontFamily: FontConstants.fontFamily),
             ),
             const SizedBox(height: 30),
             if (showRetry)
@@ -190,12 +204,18 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                 onPressed: () {
                   context.read<TextScanBloc>().add(const RetryCapture());
                 },
-                child: const Text('Try Again'),
+                child: const Text(
+                  'Try Again',
+                  style: TextStyle(fontFamily: FontConstants.fontFamily),
+                ),
               ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back'),
+              child: const Text(
+                'Go Back',
+                style: TextStyle(fontFamily: FontConstants.fontFamily),
+              ),
             ),
           ],
         ),
@@ -238,7 +258,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Column(
@@ -247,12 +267,17 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                     Text(
                       '📝 How to scan:',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                          fontFamily: FontConstants.fontFamily,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Text(
                       '1. Place handwritten list\n2. Ensure good lighting\n3. Hold steady\n4. Tap capture button',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(
+                          fontFamily: FontConstants.fontFamily,
+                          color: Colors.white,
+                          fontSize: 12),
                     ),
                   ],
                 ),
@@ -281,11 +306,12 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
               'Align list within frame',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 18, 
+                fontFamily: FontConstants.fontFamily,
                 fontWeight: FontWeight.bold,
                 shadows: [
                   Shadow(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 0.8),
                     blurRadius: 4,
                     offset: const Offset(1, 1),
                   ),
@@ -400,7 +426,7 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
 
         // Processing overlay
         Container(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -409,7 +435,11 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                 const SizedBox(height: 20),
                 const Text(
                   'Processing image...',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontFamily: FontConstants.fontFamily,
+                  ),
                 ),
                 const SizedBox(height: 40),
                 Row(
@@ -424,14 +454,22 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                       ),
-                      child: const Text('Cancel'),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontFamily: FontConstants.fontFamily),
+                      ),
                     ),
                     const SizedBox(width: 20),
                     ElevatedButton(
                       onPressed: () {
                         context.read<TextScanBloc>().add(const RetryCapture());
                       },
-                      child: const Text('Retry'),
+                      child: const Text(
+                        'Retry',
+                        style: TextStyle(
+                          fontFamily: FontConstants.fontFamily,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -452,7 +490,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
           const SizedBox(height: 20),
           Text(
             message,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontFamily: FontConstants.fontFamily),
           ),
           const SizedBox(height: 30),
           ElevatedButton(
@@ -462,7 +503,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey,
             ),
-            child: const Text('Cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
           ),
         ],
       ),
@@ -477,7 +521,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
         children: [
           const Text(
             '📋 Extracted Text',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: FontConstants.fontFamily),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -494,14 +541,19 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                   children: [
                     Text(
                       state.extractedText,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
+                      style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          fontFamily: FontConstants.fontFamily),
                     ),
                     const SizedBox(height: 20),
                     if (state.detectedText.isNotEmpty) ...[
                       const Text(
                         'Detected lines:',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.grey),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                            fontFamily: FontConstants.fontFamily),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -509,7 +561,11 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                         runSpacing: 8,
                         children: state.detectedText.map((line) {
                           return Chip(
-                            label: Text(line),
+                            label: Text(
+                              line,
+                              style: TextStyle(
+                                  fontFamily: FontConstants.fontFamily),
+                            ),
                             backgroundColor: Colors.blue.shade100,
                           );
                         }).toList(),
@@ -535,7 +591,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Edit Text'),
+                  child: const Text(
+                    'Edit Text',
+                    style: TextStyle(fontFamily: FontConstants.fontFamily),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -549,7 +608,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Parse Ingredients'),
+                  child: const Text(
+                    'Parse Ingredients',
+                    style: TextStyle(fontFamily: FontConstants.fontFamily),
+                  ),
                 ),
               ),
             ],
@@ -565,7 +627,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Found Ingredients'),
+        title: const Text(
+          'Found Ingredients',
+          style: TextStyle(fontFamily: FontConstants.fontFamily),
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -573,15 +638,23 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Original text:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: FontConstants.fontFamily)),
               Text(
                 originalText,
-                style:
-                    const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
+                style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 12,
+                    fontFamily: FontConstants.fontFamily),
               ),
               const SizedBox(height: 16),
-              const Text('Parsed ingredients:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Parsed ingredients:',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: FontConstants.fontFamily),
+              ),
               const SizedBox(height: 8),
               ...ingredients.map((ingredient) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -603,7 +676,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
               Navigator.of(dialogContext).pop();
               context.read<TextScanBloc>().add(const RetryCapture());
             },
-            child: const Text('Scan Again'),
+            child: const Text(
+              'Scan Again',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -626,7 +702,10 @@ class _IngredientTextScanScreenState extends State<IngredientTextScanScreen> {
                 ),
               );
             },
-            child: const Text('Use These Ingredients'),
+            child: const Text(
+              'Use These Ingredients',
+              style: TextStyle(fontFamily: FontConstants.fontFamily),
+            ),
           ),
         ],
       ),

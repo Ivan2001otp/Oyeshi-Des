@@ -36,37 +36,41 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                           return Transform.scale(
                             scale: scale,
                             child: Container(
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 gradient: RadialGradient(
                                   colors: [
-                                    const Color(0xFF22C55E)
+                                    const Color.fromARGB(255, 197, 156, 34)
                                         .withValues(alpha: 0.2),
-                                    const Color(0xFF22C55E)
+                                    const Color.fromARGB(255, 197, 156, 34)
                                         .withValues(alpha: 0.05),
                                   ],
                                 ),
                                 shape: BoxShape.circle,
                               ),
                               child: Container(
-                                padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF22C55E)
+                                      color: Color.fromARGB(255, 197, 156, 34)
                                           .withValues(alpha: 0.15),
-                                      blurRadius: 30,
+                                      blurRadius: 10,
                                       offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
-                                child: const Icon(
+                                /*child: const Icon(
                                   // give my app logo
                                   Icons.eco_rounded,
                                   size: 64,
                                   color: Color(0xFF22C55E),
+                                ),*/
+                                child: Image.asset(
+                                  "assets/app_logo/playstore.png",
+                                  scale: 2,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ),
@@ -75,7 +79,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 12),
-
+                    /*
                       // Welcome title
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -99,7 +103,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 24),
-
+                      */
                       // Tagline
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),

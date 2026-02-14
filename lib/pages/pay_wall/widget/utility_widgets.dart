@@ -2,11 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:oyeshi_des/constants/fonts.dart';
+import 'package:oyeshi_des/pages/input_method_selection_screen.dart';
 
 class PaywallUtilityWidgets {
-
-  static 
-  Widget buildHeader(bool isDark) {
+  static Widget buildHeader(bool isDark) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -83,7 +82,6 @@ class PaywallUtilityWidgets {
     );
   }
 
-
   static Widget buildTermsLinks(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,154 +119,158 @@ class PaywallUtilityWidgets {
     );
   }
 
+  static Widget buildCTAButton(
+      bool isDark, String _selectedPlan, BuildContext ctx) {
+    return SizedBox(
+      width: 300,
+      height: 60,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    const Color(0xFF22C55E).withValues(alpha: 0.9),
+                    const Color(0xFF059669),
+                    const Color(0xFF047857),
+                  ]
+                : [
+                    const Color(0xFF0F172A),
+                    const Color(0xFF1E293B),
+                    const Color(0xFF0F172A),
+                  ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? const Color(0xFF22C55E).withValues(alpha: 0.3)
+                  : const Color(0xFF0F172A).withValues(alpha: 0.3),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: isDark
+                  ? const Color(0xFF22C55E).withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.2),
+              blurRadius: 30,
+              spreadRadius: -5,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.of(ctx).pushReplacement(
+              MaterialPageRoute(builder: (ctx) => InputMethodSelectionScreen()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Glass morphism effect
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.5),
+                          Colors.white.withValues(alpha: 0.1),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-  static Widget buildCTAButton(bool isDark, String _selectedPlan) {
-  return SizedBox(
-    width: 300,
-    height: 60,
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  const Color(0xFF22C55E).withValues(alpha:0.9),
-                  const Color(0xFF059669),
-                  const Color(0xFF047857),
-                ]
-              : [
-                  const Color(0xFF0F172A),
-                  const Color(0xFF1E293B),
-                  const Color(0xFF0F172A),
-                ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? const Color(0xFF22C55E).withValues(alpha:0.3)
-                : const Color(0xFF0F172A).withValues(alpha:0.3),
-            blurRadius: 20,
-            spreadRadius: 0,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: isDark
-                ? const Color(0xFF22C55E).withValues(alpha:0.15)
-                : Colors.white.withValues(alpha:0.2),
-            blurRadius: 30,
-            spreadRadius: -5,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Glass morphism effect
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.1,
+              // Inner glow
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
                 child: Container(
+                  height: 30,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withValues(alpha:0.5),
-                        Colors.white.withValues(alpha:0.1),
+                        Colors.white.withValues(alpha: 0.3),
                         Colors.transparent,
                       ],
                     ),
                   ),
                 ),
               ),
-            ),
-            
-            // Inner glow
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha:0.3),
-                      Colors.transparent,
-                    ],
-                  ),
+
+              // Button content
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Start with $_selectedPlan',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: FontConstants.fontFamily,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            
-            // Button content
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Start with $_selectedPlan',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: FontConstants.fontFamily,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha:0.25),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withValues(alpha:0.3),
-                          blurRadius: 8,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

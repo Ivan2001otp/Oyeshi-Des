@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oyeshi_des/config/analytics/google_analytics.dart';
+import 'package:oyeshi_des/constants/fonts.dart';
 import 'package:oyeshi_des/pages/onboarding/onboarding_question_screen.dart';
 
 import '../../config/onboarding/remote_config.dart';
@@ -14,21 +15,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top decorative element
-            Container(
-              height: 8,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF22C55E),
-                    Color(0xFF86EFAC),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
+            // Top dec
 
             Expanded(
               child: SingleChildScrollView(
@@ -76,6 +63,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                                   ],
                                 ),
                                 child: const Icon(
+                                  // give my app logo
                                   Icons.eco_rounded,
                                   size: 64,
                                   color: Color(0xFF22C55E),
@@ -86,38 +74,25 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                         },
                       ),
 
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 12),
 
                       // Welcome title
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
-                        duration: const Duration(milliseconds: 600),
+                        duration: const Duration(milliseconds: 650),
                         curve: Curves.easeOut,
                         builder: (context, opacity, child) {
                           return Opacity(
                             opacity: opacity,
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Welcome to',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Oyishi',
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 4,
-                                    color: Color(0xFF0F172A),
-                                  ),
-                                ),
-                              ],
+                            child: const Text(
+                              'Oyishi Des',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontFamily: FontConstants.fontFamily,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                color: Color(0xFF0F172A),
+                              ),
                             ),
                           );
                         },
@@ -144,12 +119,12 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: const Text(
-                                'Stop waste • Save money • Eat well',
+                                'Save food  •  Save money',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 12,
+                                  fontFamily: FontConstants.fontFamily,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFF22C55E),
-                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ),
@@ -163,30 +138,35 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
                         duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOut,
+                        curve: Curves.easeIn,
                         builder: (context, opacity, child) {
                           return Opacity(
                             opacity: opacity,
-                            child: Row(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 _buildStatCard(
-                                  icon: Icons.delete_outline_rounded,
-                                  value: '30%',
-                                  label: 'of food wasted',
+                                  icon:
+                                      "assets/images/icons/save_food_icon.png",
+                                  value: 'Food Saved',
+                                  label: '30%',
                                   color: Colors.orange,
+                                  trailingText: '+15%',
                                 ),
                                 _buildStatCard(
-                                  icon: Icons.attach_money_rounded,
-                                  value: "\$1,600",
-                                  label: 'saved per family per year',
-                                  color: const Color(0xFF22C55E),
-                                ),
+                                    icon:
+                                        "assets/images/icons/save_money_icon.png",
+                                    value: "Money Saved",
+                                    label: '\$1,600',
+                                    color: const Color(0xFF22C55E),
+                                    trailingText: '+\$500'),
                                 _buildStatCard(
-                                  icon: Icons.restaurant_menu_rounded,
-                                  value: '3M+',
-                                  label: 'meals saved',
+                                  icon:
+                                      "assets/images/icons/meals_shared_icon.png",
+                                  value: 'Meals Shared',
+                                  label: '2M+',
                                   color: Colors.blue,
+                                  trailingText: '500K+',
                                 ),
                               ],
                             ),
@@ -195,61 +175,6 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 60),
-
-                      // Message card
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: const Duration(milliseconds: 900),
-                        curve: Curves.easeOut,
-                        builder: (context, opacity, child) {
-                          return Opacity(
-                            opacity: opacity,
-                            child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: Colors.grey[200]!,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  const Icon(
-                                    Icons.lightbulb_rounded,
-                                    color: Color(0xFF22C55E),
-                                    size: 32,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Here\'s how this works',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.grey[900],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Answer 7 quick questions about your food habits. '
-                                    'We\'ll create a personalized meal plan that helps you '
-                                    'save money and stop wasting food.',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.grey[600],
-                                      height: 1.6,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 48),
                     ],
                   ),
                 ),
@@ -276,7 +201,7 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => _startOnboarding(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF22C55E),
+                      backgroundColor: Colors.grey[850],
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -287,10 +212,11 @@ class WelcomeOnboardingScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'Start Your Journey',
+                          '🫶 Let\'s go',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            fontFamily: FontConstants.fontFamily,
+                            fontWeight: FontWeight.w900,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -320,43 +246,81 @@ class WelcomeOnboardingScreen extends StatelessWidget {
   }
 
   Widget _buildStatCard({
-    required IconData icon,
+    required String icon,
     required String value,
     required String label,
     required Color color,
+    required String trailingText,
   }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+    return Card(
+      elevation: 4,
+      color: Colors.grey[50],
+      shadowColor: Colors.black54,
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          spacing: 8,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              width: 40,
+              height: 40,
+              child: Image.asset(
+                icon,
+                width: 10,
+                height: 10,
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontFamily: FontConstants.fontFamily,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[500],
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontFamily: FontConstants.fontFamily,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                trailingText,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: FontConstants.fontFamily,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -383,7 +347,6 @@ class WelcomeOnboardingScreen extends StatelessWidget {
 
     // Navigate to onboarding
     if (config != null && config.onboarding_config.active) {
-
       Map<String, Object> parameters = {
         'onboarding_step': 'start',
       };
